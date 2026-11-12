@@ -1,0 +1,62 @@
+[
+  {
+    "teste": "POST mensagem franquia B no ticket 2",
+    "ok": true,
+    "detalhe": "201"
+  },
+  {
+    "teste": "suporte no ticket 1 NAO recebe evento do ticket 2 (escopo correto)",
+    "ok": true,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "suporte no ticket 2 recebe evento do ticket 2",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 16, 'ticket_id': 2, 'remetente': 'Funcionario Franquia B', 'remetente_id': 5, 'texto': 'iso2-43673 de B', 'url_anexo': None, 'criada_em': '2026-11-10T17:47:53.869646-03:00'}]"
+  },
+  {
+    "teste": "franquia B recebe sua propria mensagem",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 16, 'ticket_id': 2, 'remetente': 'Funcionario Franquia B', 'remetente_id': 5, 'texto': 'iso2-43673 de B', 'url_anexo': None, 'criada_em': '2026-11-10T17:47:53.869646-03:00'}]"
+  },
+  {
+    "teste": "suporte no ticket 2 recebe nota interna",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': True, 'id': 17, 'ticket_id': 2, 'remetente': 'Suporte N1', 'remetente_id': 2, 'texto': 'iso3-43682 interna B', 'url_anexo': None, 'criada_em': '2026-11-10T17:48:02.892731-03:00'}]"
+  },
+  {
+    "teste": "franquia B NAO recebe nota interna",
+    "ok": true,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "franquia B historico sem internas",
+    "ok": true,
+    "detalhe": "total=4"
+  },
+  {
+    "teste": "admin desativa franquia A",
+    "ok": false,
+    "detalhe": "422"
+  },
+  {
+    "teste": "WS negado apos desativacao",
+    "ok": false,
+    "detalhe": "conectou: {\"type\":\"authenticated\",\"ticket_id\":1}"
+  },
+  {
+    "teste": "HTTP negado apos desativacao",
+    "ok": false,
+    "detalhe": "200"
+  },
+  {
+    "teste": "admin reativa franquia A",
+    "ok": false,
+    "detalhe": "422"
+  },
+  {
+    "teste": "franquia A volta a conectar",
+    "ok": true,
+    "detalhe": "[{'type': 'authenticated', 'ticket_id': 1}]"
+  }
+]

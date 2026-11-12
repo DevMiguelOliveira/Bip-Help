@@ -1,0 +1,137 @@
+[
+  {
+    "teste": "WS sem Origin rejeitado",
+    "ok": true,
+    "detalhe": "InvalidStatus"
+  },
+  {
+    "teste": "WS Origin invalida rejeitado",
+    "ok": true,
+    "detalhe": "InvalidStatus"
+  },
+  {
+    "teste": "token ticket B no ticket A rejeitado",
+    "ok": true,
+    "detalhe": "ConnectionClosedError"
+  },
+  {
+    "teste": "franquia A mensagem normal permitida",
+    "ok": true,
+    "detalhe": "201"
+  },
+  {
+    "teste": "franquia A nota interna 403",
+    "ok": true,
+    "detalhe": "403"
+  },
+  {
+    "teste": "franquia A nao recebe ticket B (WS)",
+    "ok": true,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "suporte no ticket 1 nao recebe ticket B (escopo)",
+    "ok": true,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "franquia A nao le ticket B (HTTP)",
+    "ok": true,
+    "detalhe": "403"
+  },
+  {
+    "teste": "suporte cria nota interna",
+    "ok": true,
+    "detalhe": "201"
+  },
+  {
+    "teste": "suporte recebe nota (WS)",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': True, 'id': 20, 'ticket_id': 1, 'remetente': 'Suporte N1', 'remetente_id': 2, 'texto': 'e2i-4459 interna', 'url_anexo': None, 'criada_em': '2026-11-10T18:00:59.145471-03:00'}]"
+  },
+  {
+    "teste": "franquia A nao recebe nota (WS)",
+    "ok": true,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "franquia A historico sem internas",
+    "ok": true,
+    "detalhe": "total=7"
+  },
+  {
+    "teste": "suporte2 historico com internas",
+    "ok": true,
+    "detalhe": "total=13"
+  },
+  {
+    "teste": "POST mensagem normal",
+    "ok": true,
+    "detalhe": "201"
+  },
+  {
+    "teste": "suporte recebe normal (WS)",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 21, 'ticket_id': 1, 'remetente': 'Funcionario Franquia A', 'remetente_id': 4, 'texto': 'e2n-4464 normal', 'url_anexo': None, 'criada_em': '2026-11-10T18:01:04.190807-03:00'}]"
+  },
+  {
+    "teste": "franquia A recebe normal (WS)",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 21, 'ticket_id': 1, 'remetente': 'Funcionario Franquia A', 'remetente_id': 4, 'texto': 'e2n-4464 normal', 'url_anexo': None, 'criada_em': '2026-11-10T18:01:04.190807-03:00'}]"
+  },
+  {
+    "teste": "sem duplicacao (suporte)",
+    "ok": true,
+    "detalhe": "1"
+  },
+  {
+    "teste": "sem duplicacao (franquia)",
+    "ok": true,
+    "detalhe": "1"
+  },
+  {
+    "teste": "envio com anexo",
+    "ok": true,
+    "detalhe": "201 /uploads/b1af808595674d188db2e1d0e2fcc79"
+  },
+  {
+    "teste": "anexo transmitido (WS)",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 22, 'ticket_id': 1, 'remetente': 'Funcionario Franquia A', 'remetente_id': 4, 'texto': 'anexo e2e', 'url_anexo': '/uploads/b1af808595674d188db2e1d0e2fcc795.png', 'criada_em': '2026-11-10T18:01:14.244207-03:00'}]"
+  },
+  {
+    "teste": "franquia baixa anexo autenticada",
+    "ok": true,
+    "detalhe": "200"
+  },
+  {
+    "teste": "anexo exige auth",
+    "ok": true,
+    "detalhe": "401"
+  },
+  {
+    "teste": "mensagem entregue apos desconexao",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 23, 'ticket_id': 1, 'remetente': 'Suporte N1', 'remetente_id': 2, 'texto': 'rec2-4477 pos-desc', 'url_anexo': None, 'criada_em': '2026-11-10T18:01:17.598769-03:00'}]"
+  },
+  {
+    "teste": "franquia reconecta",
+    "ok": true,
+    "detalhe": "[{'type': 'authenticated', 'ticket_id': 1}]"
+  },
+  {
+    "teste": "reconexao sem vazamento de internas",
+    "ok": true,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "ping/pong",
+    "ok": true,
+    "detalhe": "[{'type': 'pong'}]"
+  },
+  {
+    "teste": "handshake sem token rejeitado",
+    "ok": true,
+    "detalhe": "code=1008"
+  }
+]

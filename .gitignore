@@ -1,0 +1,98 @@
+# Environment variables and secrets
+<<<<<<< HEAD
+node_modules/
+.next/
+dist/
+build/
+__pycache__/
+venv/
+env/
+=======
+>>>>>>> 16f2a51bb3087317222397def353d27e75b44806
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+venv/
+.venv/
+
+# Node.js
+node_modules/
+dist/
+build/
+.npm/
+.vite/
+
+# User uploads and application data
+backend/uploads/
+uploads/
+*.sqlite
+*.sqlite3
+*.db
+
+# Backups and archives
+*.bak
+*.bak.*
+*.backup
+*.backup.*
+*.zip
+*.tar
+*.tar.gz
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# BIPManager local snapshots and historical files
+.bipmanager_*_backup_*/
+*.pre-auth.*
+
+# Additional timestamped backup files
+*.bak_*
+*.backup_*
+
+# Historical dependency snapshots
+backend/requirements-auth-*.txt
+backend/requirements-before-auth.txt
+<<<<<<< HEAD
+
+
+# Added from STAGING GITIGNORE_PROPOSAL
+*.crt
+*.cer
+*.jks
+*.egg-info/
+eggs/
+env/
+ENV/
+*.tmp
+*.azure-original
+*.pre-dotenv
+*.pre-auth*
+=======
+>>>>>>> 16f2a51bb3087317222397def353d27e75b44806

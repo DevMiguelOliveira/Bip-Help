@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: bipmanager_db
+    restart: always
+    env_file:
+      - /etc/bipmanager/postgres.env
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_DB: bipmanager
+      TZ: America/Sao_Paulo
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

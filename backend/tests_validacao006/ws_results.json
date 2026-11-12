@@ -1,0 +1,132 @@
+[
+  {
+    "teste": "WS sem Origin rejeitado",
+    "ok": true,
+    "detalhe": "recusado InvalidStatus: server rejected WebSocket connection: HTTP 403"
+  },
+  {
+    "teste": "WS com Origin invalida rejeitado",
+    "ok": true,
+    "detalhe": "recusado InvalidStatus: server rejected WebSocket connection: HTTP 403"
+  },
+  {
+    "teste": "WS token invalido rejeitado",
+    "ok": true,
+    "detalhe": "fechado code=1008 reason="
+  },
+  {
+    "teste": "WS token de outro ticket rejeitado",
+    "ok": true,
+    "detalhe": "fechado code=1008 reason="
+  },
+  {
+    "teste": "ws-token franquia B no ticket A negado",
+    "ok": true,
+    "detalhe": "403"
+  },
+  {
+    "teste": "handshake suporte autenticado",
+    "ok": true,
+    "detalhe": "[{'type': 'authenticated', 'ticket_id': 1}]"
+  },
+  {
+    "teste": "handshake franquia A autenticado",
+    "ok": true,
+    "detalhe": "[{'type': 'authenticated', 'ticket_id': 1}]"
+  },
+  {
+    "teste": "POST mensagem normal franquia A",
+    "ok": true,
+    "detalhe": "201"
+  },
+  {
+    "teste": "suporte recebeu mensagem em tempo real",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 9, 'ticket_id': 1, 'remetente': 'Funcionario Franquia A', 'remetente_id': 4, 'texto': 'rt-343505 normal', 'url_anexo': None, 'criada_em': '2026-11-10T17:45:05.398601-03:00'}]"
+  },
+  {
+    "teste": "franquia A recebeu mensagem em tempo real",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 9, 'ticket_id': 1, 'remetente': 'Funcionario Franquia A', 'remetente_id': 4, 'texto': 'rt-343505 normal', 'url_anexo': None, 'criada_em': '2026-11-10T17:45:05.398601-03:00'}]"
+  },
+  {
+    "teste": "POST nota interna suporte",
+    "ok": true,
+    "detalhe": "201"
+  },
+  {
+    "teste": "suporte RECEBEU nota interna no WS",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': True, 'id': 10, 'ticket_id': 1, 'remetente': 'Suporte N1', 'remetente_id': 2, 'texto': 'rti-343511 interna', 'url_anexo': None, 'criada_em': '2026-11-10T17:45:11.420175-03:00'}]"
+  },
+  {
+    "teste": "franquia A NAO recebeu nota interna no WS",
+    "ok": true,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "franquia B autenticada no seu ticket",
+    "ok": true,
+    "detalhe": "[{'type': 'authenticated', 'ticket_id': 2}]"
+  },
+  {
+    "teste": "suporte recebeu mensagem do ticket B",
+    "ok": false,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "franquia A nao recebe nada do ticket B",
+    "ok": true,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "franquia A nao le historico do ticket B",
+    "ok": true,
+    "detalhe": "403"
+  },
+  {
+    "teste": "ping responde pong",
+    "ok": true,
+    "detalhe": "[{'type': 'pong'}]"
+  },
+  {
+    "teste": "mensagem pos-desconexao entregue ao suporte",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 12, 'ticket_id': 1, 'remetente': 'Suporte N1', 'remetente_id': 2, 'texto': 'rec-43528 pos-reconexao', 'url_anexo': None, 'criada_em': '2026-11-10T17:45:28.559668-03:00'}]"
+  },
+  {
+    "teste": "franquia A reconectou",
+    "ok": true,
+    "detalhe": "[{'type': 'authenticated', 'ticket_id': 1}]"
+  },
+  {
+    "teste": "historico pos-reconexao sem internas para franquia A",
+    "ok": true,
+    "detalhe": "total=5"
+  },
+  {
+    "teste": "franquia A nao recebeu notas internas antigas no WS apos reconexao",
+    "ok": true,
+    "detalhe": "[]"
+  },
+  {
+    "teste": "envio com anexo (franquia A)",
+    "ok": true,
+    "detalhe": "201 /uploads/91499d77d2d54b49a63f94eeb0837687.png"
+  },
+  {
+    "teste": "suporte recebeu anexo em tempo real",
+    "ok": true,
+    "detalhe": "[{'type': 'new_message', 'interna': False, 'id': 13, 'ticket_id': 1, 'remetente': 'Funcionario Franquia A', 'remetente_id': 4, 'texto': 'anexo teste', 'url_anexo': '/uploads/91499d77d2d54b49a63f94eeb0837687.png', 'criada_em': '2026-11-10T17:45:36.615023-03:00'}]"
+  },
+  {
+    "teste": "suporte baixa anexo",
+    "ok": true,
+    "detalhe": "200"
+  },
+  {
+    "teste": "anexo exige autenticacao",
+    "ok": true,
+    "detalhe": "401"
+  }
+]

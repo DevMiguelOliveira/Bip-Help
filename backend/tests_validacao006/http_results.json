@@ -1,0 +1,152 @@
+[
+  {
+    "teste": "login admin",
+    "ok": true,
+    "detalhe": "admin@biphelp.com"
+  },
+  {
+    "teste": "login suporte1",
+    "ok": true,
+    "detalhe": "suporte1@biphelp.com"
+  },
+  {
+    "teste": "login suporte2",
+    "ok": true,
+    "detalhe": "suporte2@biphelp.com"
+  },
+  {
+    "teste": "login franA",
+    "ok": true,
+    "detalhe": "funcionario.a@biphelp.com"
+  },
+  {
+    "teste": "login franB",
+    "ok": true,
+    "detalhe": "funcionario.b@biphelp.com"
+  },
+  {
+    "teste": "me admin",
+    "ok": true,
+    "detalhe": "perfil=administrador"
+  },
+  {
+    "teste": "me suporte1",
+    "ok": true,
+    "detalhe": "perfil=suporte_n1"
+  },
+  {
+    "teste": "me suporte2",
+    "ok": true,
+    "detalhe": "perfil=suporte_n2"
+  },
+  {
+    "teste": "me franA",
+    "ok": true,
+    "detalhe": "perfil=None"
+  },
+  {
+    "teste": "me franB",
+    "ok": true,
+    "detalhe": "perfil=None"
+  },
+  {
+    "teste": "GET /tickets sem token bloqueado",
+    "ok": true,
+    "detalhe": "401"
+  },
+  {
+    "teste": "GET mensagens sem token bloqueado",
+    "ok": true,
+    "detalhe": "401"
+  },
+  {
+    "teste": "POST mensagem sem token bloqueado",
+    "ok": true,
+    "detalhe": "401"
+  },
+  {
+    "teste": "token invalido bloqueado",
+    "ok": true,
+    "detalhe": "401"
+  },
+  {
+    "teste": "franquia A lista tickets",
+    "ok": true,
+    "detalhe": "[1]"
+  },
+  {
+    "teste": "franquia A ve apenas ticket 1",
+    "ok": true,
+    "detalhe": "[1]"
+  },
+  {
+    "teste": "franquia B lista tickets",
+    "ok": true,
+    "detalhe": "[2]"
+  },
+  {
+    "teste": "franquia B ve apenas ticket 2",
+    "ok": true,
+    "detalhe": "[2]"
+  },
+  {
+    "teste": "suporte lista ambos tickets",
+    "ok": true,
+    "detalhe": "[2, 1]"
+  },
+  {
+    "teste": "franquia A nao acessa ticket B",
+    "ok": false,
+    "detalhe": "405"
+  },
+  {
+    "teste": "franquia B nao acessa ticket A",
+    "ok": false,
+    "detalhe": "405"
+  },
+  {
+    "teste": "franquia B nao le historico do ticket A",
+    "ok": true,
+    "detalhe": "403"
+  },
+  {
+    "teste": "ticket inexistente tratado",
+    "ok": true,
+    "detalhe": "404"
+  },
+  {
+    "teste": "franquia nao cria nota interna",
+    "ok": true,
+    "detalhe": "403 {\"detail\":\"Apenas a equipe de suporte pode criar notas internas.\"}"
+  },
+  {
+    "teste": "suporte2 cria nota interna",
+    "ok": true,
+    "detalhe": "201"
+  },
+  {
+    "teste": "suporte ve internas no historico",
+    "ok": true,
+    "detalhe": "total=7"
+  },
+  {
+    "teste": "franquia A NAO ve internas no historico",
+    "ok": true,
+    "detalhe": "total=3"
+  },
+  {
+    "teste": "ws-token suporte ticket 1",
+    "ok": true,
+    "detalhe": "200"
+  },
+  {
+    "teste": "ws-token franquia A ticket 1",
+    "ok": true,
+    "detalhe": "200"
+  },
+  {
+    "teste": "ws-token franquia A ticket B negado",
+    "ok": true,
+    "detalhe": "403"
+  }
+]

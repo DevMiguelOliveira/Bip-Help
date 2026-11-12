@@ -1,0 +1,28 @@
+*** Begin Patch
+*** Update File: frontend\src\pages\LoginPage.tsx
+@@ -28,7 +28,8 @@
+   return (
+     <div className="login-screen">
+       <div className="login-left">
+-        <div className="login-brand"><div className="brand-mark"><span>B</span><i /></div><strong>BIPManager</strong></div>
++        <div className="login-brand"><img src="/logo-biphelp.png" alt="BipHelp" style={{height: '40px'}} /></div>
++        <div className="login-tagline">SUPORTE INTELIGENTE, SEM COMPLICAÇÃO</div>
+         <div className="login-hero">
+           <div className="eyebrow"><Sparkles size={14} /> GESTÃO INTELIGENTE DE SUPORTE</div>
+           <h1>O suporte conectado.<br /><span>A operação em movimento.</span></h1>
+@@ -37,13 +38,13 @@
+             <div className="visual-card-top"><span>VISÃO OPERACIONAL</span><span className="live-indicator"><i /> AO VIVO</span></div>
+             <div className="visual-stats"><div><small>Central de atendimento</small><strong>Em um só lugar</strong></div><div className="visual-ring"><span>360°</span></div></div>
+             <div className="visual-lines"><i /><i /><i /></div>
+           </div>
+         </div>
+-        <div className="login-left-footer"><span>© {new Date().getFullYear()} BIPManager</span><span>Plataforma de suporte e operações</span></div>
++        <div className="login-left-footer"><span>© {new Date().getFullYear()} BipHelp</span><span>Plataforma de suporte e operações</span></div>
+       </div>
+       <div className="login-right">
+         <div className="login-form-wrap">
+-          <div className="mobile-login-brand"><div className="brand-mark"><span>B</span><i /></div><strong>BIPManager</strong></div>
++          <div className="mobile-login-brand"><img src="/logo-biphelp.png" alt="BipHelp" style={{height: '30px'}} /></div>
+           <div className="login-heading"><span className="login-kicker">BEM-VINDO DE VOLTA</span><h2>Acesse sua conta</h2><p>Entre com suas credenciais para continuar.</p></div>
+           <form onSubmit={submit} className="login-form">
+*** End Patch

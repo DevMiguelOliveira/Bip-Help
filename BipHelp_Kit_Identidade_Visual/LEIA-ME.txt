@@ -1,0 +1,11 @@
+BIPHELP — KIT PNG COM TRANSPARÊNCIA REAL
+
+Arquivos principais:
+- logos/BipHelp_logo_horizontal_transparente.png: logo horizontal com tagline e fundo transparente.
+- icones/BipHelp_simbolo_transparente.png: símbolo isolado com fundo transparente.
+- icones/BipHelp_simbolo_branco.png e BipHelp_simbolo_preto.png: versões monocromáticas transparentes.
+- favicons/: símbolos centralizados em PNG RGBA, tamanhos de 16 a 1024 px.
+
+Todos os arquivos de logo/ícone são PNG com canal alfa (RGBA). A prancha de referência é apenas uma imagem de comparação e não é um logo transparente.
+
+Observação: estes arquivos foram extraídos por remoção de fundo da arte de referência fornecida. Para uso vetorial profissional, ainda é recomendável redesenhar o símbolo e lettering em SVG.

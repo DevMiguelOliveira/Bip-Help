@@ -1,0 +1,39 @@
+- generic [active] [ref=e1]:
+  - text: "`n"
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img "BipHelp" [ref=e6]
+      - generic [ref=e7]: SUPORTE INTELIGENTE, SEM COMPLICAÇÃO
+      - generic [ref=e8]:
+        - generic [ref=e9]: GESTÃO INTELIGENTE DE SUPORTE
+        - heading "O suporte conectado. A operação em movimento." [level=1] [ref=e13]: O suporte conectado.A operação em movimento.
+        - paragraph [ref=e14]: Uma visão integrada dos chamados, franquias e conversas. Mais clareza para quem atende. Mais agilidade para quem precisa.
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - generic [ref=e17]: VISÃO OPERACIONAL
+            - generic [ref=e18]: AO VIVO
+          - generic [ref=e20]:
+            - generic [ref=e21]:
+              - generic [ref=e22]: Central de atendimento
+              - strong [ref=e23]: Em um só lugar
+            - generic [ref=e24]: 360°
+      - generic [ref=e30]:
+        - generic [ref=e31]: © 2026 BipHelp
+        - generic [ref=e32]: Plataforma de suporte e operações
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - text: BEM-VINDO DE VOLTA
+        - heading "Acesse sua conta" [level=2] [ref=e36]
+        - paragraph [ref=e37]: Entre com suas credenciais para continuar.
+      - generic [ref=e38]:
+        - generic [ref=e39]: E-mail corporativo
+        - textbox "E-mail corporativo" [ref=e44]:
+          - /placeholder: voce@empresa.com.br
+        - generic [ref=e45]: Senha
+        - generic [ref=e47]:
+          - textbox "Senha" [ref=e52]:
+            - /placeholder: Digite sua senha
+          - button "Mostrar senha" [ref=e53] [cursor=pointer]
+        - button "Entrar na plataforma" [ref=e57] [cursor=pointer]
+      - generic [ref=e60]: Conexão segura com autenticação protegida
+      - generic [ref=e65]: Acesso destinado a usuários autorizados da rede.
