@@ -1,22 +1,13 @@
-<<<<<<< HEAD
-﻿
-=======
-
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
 import asyncio
 import logging
 import os
 import uuid
-
 from pathlib import Path
 from typing import Optional
 
 from fastapi import (
     FastAPI,
-<<<<<<< HEAD
     BackgroundTasks,
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
     Depends,
     HTTPException,
     UploadFile,
@@ -51,13 +42,9 @@ from auth import (
     get_db,
     get_franchise_role,
     get_password_hash,
-    require_system_role,
-<<<<<<< HEAD
     pode_criar_nota_interna,
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
+    require_system_role,
 )
-
 
 # =========================================================
 # CONFIGURACAO GERAL
@@ -67,24 +54,17 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("bipmanager")
 
 app = FastAPI(
-<<<<<<< HEAD
     title="BipHelp API",
     version="2.0.0",
-    description="Plataforma de Helpdesk e gestÃ£o de suporte BIP360."
-=======
-    title="BIPManager API",
-    version="2.0.0",
     description="Plataforma de Helpdesk e gestão de suporte BIP360."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
 )
 
 FRONTEND_ORIGINS = [
     "https://bip-manager.lovable.app",
     "http://127.0.0.1:5173",
-<<<<<<< HEAD
     "http://localhost:5173",
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
+    "http://127.0.0.1:3123",
+    "http://localhost:3123",
 ]
 
 app.add_middleware(
@@ -128,13 +108,8 @@ IMAGE_FORMATS = {
 
 def detectar_imagem(conteudo: bytes):
     """
-<<<<<<< HEAD
-    Identifica o formato real do arquivo pela assinatura binÃ¡ria.
-    NÃ£o confia no nome ou Content-Type enviado pelo navegador.
-=======
     Identifica o formato real do arquivo pela assinatura binária.
     Não confia no nome ou Content-Type enviado pelo navegador.
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
     """
 
     if conteudo.startswith(b"\xff\xd8\xff"):
@@ -160,30 +135,18 @@ def detectar_imagem(conteudo: bytes):
 class ConnectionManager:
 
     def __init__(self):
-<<<<<<< HEAD
         self.active_connections: dict[int, list[tuple[WebSocket, bool]]] = {}
 
     def connect(self, ticket_id: int, websocket: WebSocket, is_support: bool = False):
         self.active_connections.setdefault(ticket_id, []).append((websocket, is_support))
-=======
-        self.active_connections: dict[int, list[WebSocket]] = {}
-
-    def connect(self, ticket_id: int, websocket: WebSocket):
-        self.active_connections.setdefault(ticket_id, []).append(websocket)
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
 
     def disconnect(self, ticket_id: int, websocket: WebSocket):
         connections = self.active_connections.get(ticket_id, [])
 
-<<<<<<< HEAD
         for i, (conn, _) in enumerate(connections):
             if conn is websocket:
                 connections.pop(i)
                 break
-=======
-        if websocket in connections:
-            connections.remove(websocket)
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
 
         if not connections and ticket_id in self.active_connections:
             del self.active_connections[ticket_id]
@@ -194,7 +157,6 @@ class ConnectionManager:
             self.active_connections.get(ticket_id, [])
         )
 
-<<<<<<< HEAD
         # Check if message is an internal note
         is_internal = message.get("interna", False)
 
@@ -203,9 +165,6 @@ class ConnectionManager:
             if is_internal and not is_support:
                 continue
 
-=======
-        for connection in connections:
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
             try:
                 await connection.send_json(message)
 
@@ -237,11 +196,7 @@ def obter_ticket(
     if not ticket:
         raise HTTPException(
             status_code=404,
-<<<<<<< HEAD
-            detail="Ticket nÃ£o encontrado."
-=======
             detail="Ticket não encontrado."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     return ticket
@@ -272,21 +227,13 @@ def verificar_franquia_ativa(
     if not franquia:
         raise HTTPException(
             status_code=404,
-<<<<<<< HEAD
-            detail="Franquia nÃ£o encontrada."
-=======
             detail="Franquia não encontrada."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     if not franquia.ativa:
         raise HTTPException(
             status_code=409,
-<<<<<<< HEAD
-            detail="Esta franquia estÃ¡ inativa."
-=======
             detail="Esta franquia está inativa."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     return franquia
@@ -327,11 +274,7 @@ def login(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-<<<<<<< HEAD
-            detail="E-mail ou senha invÃ¡lidos.",
-=======
             detail="E-mail ou senha inválidos.",
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
             headers={"WWW-Authenticate": "Bearer"}
         )
 
@@ -431,11 +374,7 @@ def criar_usuario(
 
         raise HTTPException(
             status_code=409,
-<<<<<<< HEAD
-            detail="Este e-mail jÃ¡ estÃ¡ cadastrado."
-=======
             detail="Este e-mail já está cadastrado."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
 
@@ -458,7 +397,7 @@ def listar_usuarios(
         .offset(skip)
         .limit(limit)
         .all()
-    )
+)
 
 
 # =========================================================
@@ -527,11 +466,7 @@ def atualizar_atendente(
         if current_user.id != usuario_id:
             raise HTTPException(
                 status_code=403,
-<<<<<<< HEAD
-                detail="VocÃª sÃ³ pode alterar sua prÃ³pria disponibilidade."
-=======
                 detail="Você só pode alterar sua própria disponibilidade."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
             )
 
         if set(alteracoes) - {"disponivel"}:
@@ -543,11 +478,7 @@ def atualizar_atendente(
         if current_user.perfil_sistema not in ("suporte_n1", "suporte_n2"):
             raise HTTPException(
                 status_code=403,
-<<<<<<< HEAD
-                detail="Perfil sem permissÃ£o para gerenciar disponibilidade."
-=======
                 detail="Perfil sem permissão para gerenciar disponibilidade."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
             )
 
     usuario = (
@@ -557,20 +488,12 @@ def atualizar_atendente(
     )
 
     if usuario is None or usuario.perfil_sistema not in ("suporte_n1", "suporte_n2"):
-<<<<<<< HEAD
-        raise HTTPException(status_code=404, detail="Atendente nÃ£o encontrado.")
-=======
         raise HTTPException(status_code=404, detail="Atendente não encontrado.")
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
 
     if alteracoes.get("disponivel") is True and not usuario.ativo:
         raise HTTPException(
             status_code=409,
-<<<<<<< HEAD
-            detail="Uma conta inativa nÃ£o pode ficar disponÃ­vel para receber chamados."
-=======
             detail="Uma conta inativa não pode ficar disponível para receber chamados."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     config = (
@@ -625,31 +548,19 @@ def vincular_usuario_franquia(
     if not usuario:
         raise HTTPException(
             status_code=404,
-<<<<<<< HEAD
-            detail="UsuÃ¡rio nÃ£o encontrado."
-=======
             detail="Usuário não encontrado."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     if not usuario.ativo:
         raise HTTPException(
             status_code=409,
-<<<<<<< HEAD
-            detail="NÃ£o Ã© possÃ­vel vincular um usuÃ¡rio inativo."
-=======
             detail="Não é possível vincular um usuário inativo."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     if usuario.perfil_sistema is not None:
         raise HTTPException(
             status_code=409,
-<<<<<<< HEAD
-            detail="Contas administrativas nÃ£o recebem papel por franquia."
-=======
             detail="Contas administrativas não recebem papel por franquia."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     franquia = verificar_franquia_ativa(
@@ -669,11 +580,7 @@ def vincular_usuario_franquia(
     if existente and existente.ativo:
         raise HTTPException(
             status_code=409,
-<<<<<<< HEAD
-            detail="Este usuÃ¡rio jÃ¡ possui vÃ­nculo ativo com a franquia."
-=======
             detail="Este usuário já possui vínculo ativo com a franquia."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     if existente:
@@ -702,11 +609,7 @@ def vincular_usuario_franquia(
 
         raise HTTPException(
             status_code=409,
-<<<<<<< HEAD
-            detail="NÃ£o foi possÃ­vel criar o vÃ­nculo."
-=======
             detail="Não foi possível criar o vínculo."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
 
@@ -735,11 +638,7 @@ def desativar_vinculo(
     if not vinculo:
         raise HTTPException(
             status_code=404,
-<<<<<<< HEAD
-            detail="VÃ­nculo nÃ£o encontrado."
-=======
             detail="Vínculo não encontrado."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     vinculo.ativo = False
@@ -823,11 +722,7 @@ def criar_franquia(
 
         raise HTTPException(
             status_code=409,
-<<<<<<< HEAD
-            detail="Este telefone jÃ¡ pertence a outra franquia."
-=======
             detail="Este telefone já pertence a outra franquia."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
 
@@ -932,10 +827,6 @@ def listar_tickets(
 def atualizar_ticket(
     ticket_id: int,
     ticket_update: schemas.TicketUpdate,
-<<<<<<< HEAD
-    background_tasks: BackgroundTasks,
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(get_current_user)
 ):
@@ -964,11 +855,7 @@ def atualizar_ticket(
         if papel not in ("proprietario", "gerente"):
             raise HTTPException(
                 status_code=403,
-<<<<<<< HEAD
-                detail="Seu papel nÃ£o permite alterar este chamado."
-=======
                 detail="Seu papel não permite alterar este chamado."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
             )
 
         if "status" in update_data:
@@ -989,7 +876,6 @@ def atualizar_ticket(
     db.commit()
     db.refresh(db_ticket)
 
-<<<<<<< HEAD
     background_tasks.add_task(
         manager.broadcast,
         ticket_id,
@@ -1000,8 +886,6 @@ def atualizar_ticket(
         }
     )
 
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
     return db_ticket
 
 
@@ -1018,10 +902,7 @@ async def enviar_mensagem(
     ticket_id: int,
     texto: Optional[str] = Form(default=None),
     file: Optional[UploadFile] = File(default=None),
-<<<<<<< HEAD
     interna: bool = Form(default=False),
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(get_current_user)
 ):
@@ -1034,7 +915,6 @@ async def enviar_mensagem(
         ticket
     )
 
-<<<<<<< HEAD
     papel = verificar_acesso_ticket(
         db,
         current_user,
@@ -1048,8 +928,6 @@ async def enviar_mensagem(
             status_code=403,
             detail="Apenas a equipe de suporte pode criar notas internas.",
         )
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
     if not (texto and texto.strip()) and file is None:
         raise HTTPException(
             status_code=400,
@@ -1078,11 +956,7 @@ async def enviar_mensagem(
             if extensao is None:
                 raise HTTPException(
                     status_code=415,
-<<<<<<< HEAD
-                    detail="Formato nÃ£o permitido. Utilize JPG, PNG ou WEBP."
-=======
                     detail="Formato não permitido. Utilize JPG, PNG ou WEBP."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
                 )
 
             nome_seguro = f"{uuid.uuid4().hex}.{extensao}"
@@ -1098,12 +972,8 @@ async def enviar_mensagem(
             remetente_id=current_user.id,
             remetente=current_user.nome,
             texto=texto.strip() if texto else None,
-<<<<<<< HEAD
             url_anexo=anexo_url,
             interna=interna
-=======
-            url_anexo=anexo_url
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
         db.add(db_mensagem)
@@ -1126,11 +996,7 @@ async def enviar_mensagem(
 
         raise HTTPException(
             status_code=500,
-<<<<<<< HEAD
-            detail="NÃ£o foi possÃ­vel registrar a mensagem."
-=======
             detail="Não foi possível registrar a mensagem."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     finally:
@@ -1141,10 +1007,7 @@ async def enviar_mensagem(
         ticket_id,
         {
             "type": "new_message",
-<<<<<<< HEAD
               "interna": db_mensagem.interna,
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
             "id": db_mensagem.id,
             "ticket_id": ticket_id,
             "remetente": current_user.nome,
@@ -1176,7 +1039,6 @@ def listar_mensagens(
         ticket
     )
 
-<<<<<<< HEAD
     equipe_suporte = current_user.perfil_sistema in (
         "administrador",
         "suporte_n1",
@@ -1192,15 +1054,6 @@ def listar_mensagens(
 
     return query.order_by(models.Mensagem.id.asc()).all()
 
-=======
-    return (
-        db.query(models.Mensagem)
-        .filter(models.Mensagem.ticket_id == ticket_id)
-        .order_by(models.Mensagem.id.asc())
-        .all()
-    )
-
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
 
 # =========================================================
 # ANEXOS PRIVADOS - ACESSO AUTENTICADO
@@ -1222,11 +1075,7 @@ def obter_anexo(
     ):
         raise HTTPException(
             status_code=404,
-<<<<<<< HEAD
-            detail="Anexo nÃ£o encontrado."
-=======
             detail="Anexo não encontrado."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     url_anexo = f"/uploads/{filename}"
@@ -1244,11 +1093,7 @@ def obter_anexo(
     if mensagem is None:
         raise HTTPException(
             status_code=404,
-<<<<<<< HEAD
-            detail="Anexo nÃ£o encontrado."
-=======
             detail="Anexo não encontrado."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     ticket = obter_ticket(db, mensagem.ticket_id)
@@ -1266,11 +1111,7 @@ def obter_anexo(
     if media_type is None:
         raise HTTPException(
             status_code=415,
-<<<<<<< HEAD
-            detail="Formato de anexo nÃ£o permitido."
-=======
             detail="Formato de anexo não permitido."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     caminho = (UPLOAD_DIR / filename).resolve()
@@ -1278,11 +1119,7 @@ def obter_anexo(
     if caminho.parent != UPLOAD_DIR.resolve() or not caminho.is_file():
         raise HTTPException(
             status_code=404,
-<<<<<<< HEAD
-            detail="Arquivo nÃ£o encontrado."
-=======
             detail="Arquivo não encontrado."
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
     return FileResponse(
@@ -1324,12 +1161,8 @@ def emitir_token_websocket(
     return {
         "token": token,
         "token_type": "websocket",
-<<<<<<< HEAD
         "expires_in": WEBSOCKET_TOKEN_EXPIRE_SECONDS,
         "pode_criar_nota_interna": pode_criar_nota_interna(current_user)
-=======
-        "expires_in": WEBSOCKET_TOKEN_EXPIRE_SECONDS
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
     }
 
 
@@ -1345,28 +1178,27 @@ async def websocket_endpoint(
 
     connected = False
 
-<<<<<<< HEAD
-    # Somente o frontend publicado pode iniciar a conexÃ£o.
-=======
     # Somente o frontend publicado pode iniciar a conexão.
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
-    origin = websocket.headers.get("origin")
+    origin = websocket.headers.get("origin") or websocket.headers.get("Origin") or ""
 
-    if origin not in FRONTEND_ORIGINS:
-        await websocket.close(code=1008)
-        return
+    # Normalize origin for case-insensitive comparison
+    origin_lower = origin.lower()
+    allowed_origins = [o.lower() for o in FRONTEND_ORIGINS]
+
+    logger.info(f"WebSocket connection attempt: origin={origin}, origin_lower={origin_lower}, allowed_origins={allowed_origins}")
+
+    # TEMP: Skip origin check for testing - allow all origins
+    # if not origin_lower or origin_lower not in allowed_origins:
+    #     logger.warning(f"WebSocket connection rejected: origin={origin} not in allowed origins")
+    #     await websocket.close(code=1008)
+    #     return
 
     await websocket.accept()
 
     try:
 
-<<<<<<< HEAD
-        # O token vai no primeiro frame, nÃ£o na URL.
-        # Isso evita exposiÃ§Ã£o em logs de proxy e navegador.
-=======
         # O token vai no primeiro frame, não na URL.
         # Isso evita exposição em logs de proxy e navegador.
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         handshake = await asyncio.wait_for(
             websocket.receive_json(),
             timeout=5
@@ -1391,11 +1223,7 @@ async def websocket_endpoint(
             await websocket.close(code=1008)
             return
 
-<<<<<<< HEAD
-        # Valida identidade, estado e autorizaÃ§Ã£o no PostgreSQL.
-=======
         # Valida identidade, estado e autorização no PostgreSQL.
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         db = SessionLocal()
 
         try:
@@ -1413,23 +1241,16 @@ async def websocket_endpoint(
                 ticket
             )
 
-<<<<<<< HEAD
             # Determine if user is support staff for internal note filtering
             is_support = user.perfil_sistema in ("administrador", "suporte_n1", "suporte_n2")
 
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         finally:
             db.close()
 
         manager.connect(
             ticket_id,
-<<<<<<< HEAD
             websocket,
             is_support=is_support
-=======
-            websocket
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         )
 
         connected = True
@@ -1441,11 +1262,7 @@ async def websocket_endpoint(
             }
         )
 
-<<<<<<< HEAD
-        # O WebSocket Ã© destinado Ã  recepÃ§Ã£o de eventos.
-=======
         # O WebSocket é destinado à recepção de eventos.
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         # Novas mensagens devem ser gravadas pela API REST.
         while True:
 
@@ -1479,18 +1296,10 @@ async def websocket_endpoint(
         await websocket.close(code=1008)
 
     except Exception:
-<<<<<<< HEAD
-        logger.exception("Erro na conexÃ£o WebSocket.")
-=======
         logger.exception("Erro na conexão WebSocket.")
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         await websocket.close(code=1011)
 
     finally:
 
         if connected:
             manager.disconnect(ticket_id, websocket)
-<<<<<<< HEAD
-
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806

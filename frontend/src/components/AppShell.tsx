@@ -1,11 +1,7 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Bell, Bot, Building2, BarChart3, ChevronDown,
-<<<<<<< HEAD
   Headset, Inbox, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen,
-=======
-  Headset, Inbox, LayoutDashboard, LogOut, PanelLeftClose, PanelLeftOpen,
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
   Settings2, ShieldCheck, Store, Ticket, UserRound, Users,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -30,10 +26,7 @@ export default function AppShell() {
   const location = useLocation()
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('bip-theme') as 'light' | 'dark') || 'light')
   const [collapsed, setCollapsed] = useState(false)
-<<<<<<< HEAD
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
   const isAdmin = user?.perfil_sistema === 'administrador'
   const isSupport = user?.perfil_sistema === 'suporte_n1' || user?.perfil_sistema === 'suporte_n2'
   const isInternal = isAdmin || isSupport
@@ -43,13 +36,10 @@ export default function AppShell() {
     localStorage.setItem('bip-theme', theme)
   }, [theme])
 
-<<<<<<< HEAD
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [location.pathname])
 
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
   const signOut = () => { logout(); navigate('/login', { replace: true }) }
   const title = (isInternal ? staffPages : clientPages)[location.pathname] || 'BIPManager'
   const staffPrimary: NavItem[] = [
@@ -68,12 +58,8 @@ export default function AppShell() {
 
   return (
     <div className={`app-shell ${collapsed ? 'sidebar-collapsed' : ''} ${isInternal ? 'staff-shell' : 'client-shell'}`}>
-<<<<<<< HEAD
       {mobileMenuOpen && <button type="button" className="sidebar-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
       <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-=======
-      <aside className="sidebar">
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         <div className="brand-lockup">
           <div className="brand-mark"><span>B</span><i /></div>
           {!collapsed && <div className="brand-copy"><strong>BIPManager</strong><small>{isInternal ? 'SUPPORT PLATFORM' : 'PORTAL DA FRANQUIA'}</small></div>}
@@ -86,28 +72,16 @@ export default function AppShell() {
         <nav className="main-nav">
           {primary.map((item) => {
             const Icon = item.icon
-<<<<<<< HEAD
             return <NavLink key={item.to} to={item.to} end={item.end} title={item.label} onClick={() => setMobileMenuOpen(false)}><Icon size={18} /><span>{item.label}</span>{item.badge && <span className="nav-pill">{item.badge}</span>}</NavLink>
           })}
           {isInternal && <>
             {(isAdmin || isSupport) && <NavLink to="/franchises" title="Franquias" onClick={() => setMobileMenuOpen(false)}><Building2 size={18} /><span>Franquias</span></NavLink>}
             {isAdmin && <NavLink to="/users" title="Usuários" onClick={() => setMobileMenuOpen(false)}><UserRound size={18} /><span>Usuários</span></NavLink>}
-=======
-            return <NavLink key={item.to} to={item.to} end={item.end} title={item.label}><Icon size={18} /><span>{item.label}</span>{item.badge && <span className="nav-pill">{item.badge}</span>}</NavLink>
-          })}
-          {isInternal && <>
-            {(isAdmin || isSupport) && <NavLink to="/franchises" title="Franquias"><Building2 size={18} /><span>Franquias</span></NavLink>}
-            {isAdmin && <NavLink to="/users" title="Usuários"><UserRound size={18} /><span>Usuários</span></NavLink>}
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
           </>}
         </nav>
         <div className="nav-section-label secondary-label">{isInternal ? 'ADMINISTRAÇÃO' : 'CONTA'}</div>
         <nav className="main-nav">
-<<<<<<< HEAD
           <NavLink to="/settings" title={isInternal ? 'Configurações' : 'Minha conta'} onClick={() => setMobileMenuOpen(false)}><Settings2 size={18} /><span>{isInternal ? 'Configurações' : 'Minha conta'}</span></NavLink>
-=======
-          <NavLink to="/settings" title={isInternal ? 'Configurações' : 'Minha conta'}><Settings2 size={18} /><span>{isInternal ? 'Configurações' : 'Minha conta'}</span></NavLink>
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
         </nav>
         <div className="sidebar-spacer" />
         <div className="security-note">
@@ -122,10 +96,7 @@ export default function AppShell() {
       </aside>
       <main className="main-area">
         <header className="topbar">
-<<<<<<< HEAD
           <button type="button" className="mobile-menu-button" aria-label="Abrir menu" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((v) => !v)}><Menu size={21} /></button>
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
           <div className="breadcrumb"><span>{isInternal ? 'Suporte' : 'Portal'}</span><span className="crumb-slash">/</span><strong>{title}</strong></div>
           <div className="topbar-actions">
             {isInternal && <div className="system-status"><span className="status-dot" /> Operação normal</div>}

@@ -51,13 +51,10 @@ export default function TicketChatDialog({ ticket, onClose }: { ticket: Ticket; 
           try {
             const payload = JSON.parse(event.data) as Record<string, unknown>
             if (payload.type === 'authenticated') { setWsStatus('connected'); retryCount = 0; return }
-<<<<<<< HEAD
-            if (payload.type === 'ticket_updated' && payload.ticket_id === ticket.id) {
+if (payload.type === 'ticket_updated' && payload.ticket_id === ticket.id) {
               queryClient.invalidateQueries({ queryKey: ['tickets'] })
               return
             }
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
             if (payload.type === 'new_message' && typeof payload.id === 'number') {
               setLiveMessages((old) => [...old, payload as unknown as Message])
               queryClient.invalidateQueries({ queryKey: ['messages', ticket.id] })

@@ -59,10 +59,7 @@ export interface Message {
   remetente_id: number | null
   texto: string | null
   url_anexo: string | null
-<<<<<<< HEAD
-  interna: boolean
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
+interna: boolean
   criada_em: string
 }
 

@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
 from datetime import datetime
 from typing import Literal
 
@@ -62,17 +58,7 @@ class MensagemCreate(BaseModel):
 
 class MensagemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    ticket_id: int
-    remetente: str
-    remetente_id: int | None = None
-    texto: str | None = None
-    url_anexo: str | None = None
-<<<<<<< HEAD
     interna: bool = False
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
     criada_em: datetime
 
 
@@ -90,10 +76,7 @@ class WebSocketTokenResponse(BaseModel):
     token: str
     token_type: Literal["websocket"] = "websocket"
     expires_in: int
-<<<<<<< HEAD
     pode_criar_nota_interna: bool = False
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
 
 
 # =========================================================

@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowRight, CheckCircle2, Clock3, Filter, MessageSquare, Plus, RefreshCw, Ticket, TrendingUp, Building2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Clock3, Filter, MessageSquare, Plus, RefreshCw, Ticket, TrendingUp, Building2, Eye, Sync, AlertCircle, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getFranchises, getTickets } from '../services/data'
@@ -12,12 +12,17 @@ export default function DashboardPage() {
   const { token, user } = useAuth()
   const [filter, setFilter] = useState('all')
   const [showNew, setShowNew] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const { data: franchises = [], isLoading: loadingFranchises, refetch: refetchFranchises } = useQuery({ queryKey: ['franchises'], queryFn: () => getFranchises(token!), enabled: !!token })
-<<<<<<< HEAD
-  const { data: tickets = [], isLoading: loadingTickets, refetch } = useQuery({ queryKey: ['tickets'], queryFn: () => getTickets(token!), enabled: !!token, refetchInterval: 10_000, refetchIntervalInBackground: false })
-=======
-  const { data: tickets = [], isLoading: loadingTickets, refetch } = useQuery({ queryKey: ['tickets'], queryFn: () => getTickets(token!), enabled: !!token })
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
+  const { data: tickets = [], isLoading: loadingTickets, refetch } = useQuery({ queryKey: ['tickets'], queryFn: () => getTickets(token!), enabled: !!token, refetchInterval: 15_000, refetchIntervalInBackground: false })
+
+  // Efeito de pulso no novo chamado
+  useEffect(() => {
+    const pulseInterval = setInterval(() => {
+      setShowNotifications(!showNotifications)
+    }, 2000)
+    return () => clearInterval(pulseInterval)
+  }, [showNotifications])
 
   const scopedTickets = useMemo(() => tickets.filter((t) => filter === 'all' || String(t.franquia_id) === filter), [tickets, filter])
   const opened = scopedTickets.filter((t) => t.status === 'Aberto').length
@@ -31,7 +36,7 @@ export default function DashboardPage() {
 
   return (
     <div className="page-stack">
-      <section className="welcome-row"><div><div className="eyebrow muted-eyebrow"><span className="status-dot" /> CENTRAL DE OPERAÇÕES</div><h1>Bom trabalho, {user?.nome?.split(' ')[0]}.</h1><p>Acompanhe o que acontece nas suas unidades e mantenha o atendimento em movimento.</p></div><div className="welcome-actions"><button className="secondary-button" onClick={refresh}><RefreshCw size={16} /> Atualizar</button><button className="primary-button" onClick={() => setShowNew(true)}><Plus size={17} /> Novo chamado</button></div></section>
+      <section className="welcome-row"><div><div className="eyebrow muted-eyebrow"><span className="status-dot" /> CENTRAL DE OPERAÇÕES</div><h1>Bom trabalho, {user?.nome?.split(' ')[0]}. <Eye size={12} className="pulse-icon" /> Bom trabalho, {user?.nome?.split(' ')[0]}.</h1><p>Acompanhe o que acontece nas suas unidades e mantenha o atendimento em movimento.</p></div><div className="welcome-actions"><button className="secondary-button" onClick={refresh}><RefreshCw size={16} /> Atualizar</button><button className="primary-button" onClick={() => setShowNew(true)}><Plus size={17} /> Novo chamado</button><button className="secondary-button" onClick={() => setShowNotifications(true)}><AlertCircle size={16} /> Notificações</button></div></section>
       <section className="dashboard-filter-row"><div className="filter-caption"><Filter size={15} /><span>Visão de atendimento</span></div><select className="select-control" value={filter} onChange={(e) => setFilter(e.target.value)}><option value="all">Todas as unidades</option>{franchises.map((f) => <option key={f.id} value={f.id}>{f.unidade}</option>)}</select><span className="filter-context">Exibindo: <strong>{selectedName}</strong></span></section>
       {isLoading ? <div className="panel loading-panel">Carregando indicadores da API…</div> : <>
         <section className="stat-grid">
@@ -39,6 +44,7 @@ export default function DashboardPage() {
           <StatCard label="Abertos" value={opened} detail="Aguardando atendimento" icon={<Clock3 size={19} />} tone="amber" trend="Fila de entrada" />
           <StatCard label="Em atendimento" value={inProgress} detail="Em acompanhamento" icon={<MessageSquare size={19} />} tone="violet" trend="Em andamento" />
           <StatCard label="Encerrados" value={closed} detail="Atendimentos concluídos" icon={<CheckCircle2 size={19} />} tone="green" trend="Concluídos" />
+          <StatCard label="Nova alerta" value={showNotifications ? 1 : 0} detail="Chamados recentes" icon={<AlertCircle size={19} />} tone="red" trend="Atenção" />
         </section>
         <section className="dashboard-main-grid">
           <div className="panel recent-panel"><div className="panel-heading"><div><span className="section-kicker">ACOMPANHAMENTO</span><h2>Chamados recentes</h2><p>Últimas solicitações registradas nas unidades.</p></div><Link to="/tickets" className="text-link">Ver todos <ArrowRight size={15} /></Link></div>

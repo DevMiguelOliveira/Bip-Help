@@ -70,11 +70,7 @@ class Mensagem(Base):
     )
     texto = Column(Text, nullable=True)
     url_anexo = Column(String, nullable=True)
-<<<<<<< HEAD
     interna = Column(Boolean, default=False, server_default="false", nullable=False)
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
-    criada_em = Column(DateTime(timezone=True), server_default=func.now())
 
     ticket = relationship(
         "Ticket",

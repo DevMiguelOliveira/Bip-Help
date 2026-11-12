@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -307,7 +306,6 @@ def create_websocket_token(
     )
 
 
-<<<<<<< HEAD
 # =========================================================
 # AUTORIZACAO DE MENSAGENS INTERNAS
 # =========================================================
@@ -319,29 +317,29 @@ def check_mensagem_interna_autorizacao(
 ) -> bool:
     """
     Verifica se o usuário atual pode acessar uma mensagem interna.
-    
+
     Regras:
     - Administradores e suporte do sistema (perfil_sistema) podem acessar.
     - Usuários com perfil de franquia (proprietario, gerente, funcionario)
       NÃO podem acessar mensagens internas de outras franquias ou da própria.
     - Apenas o criador da mensagem ou suporte de sistema tem acesso.
-    
+
     Returns True se autorizado, False otherwise.
     """
     # Administradores e suporte do sistema têm acesso total
     if current_user.perfil_sistema in (
         "administrador",
-        "suporte_n1", 
+        "suporte_n1",
         "suporte_n2"
     ):
         return True
-    
+
     # Usuários de franquia NÃO podem acessar mensagens internas
     # Verificar se a mensagem é interna
     if mensagem.interna:
         # Franqueados não podem ver notas internas
         return False
-    
+
     # Mensagens normais (interna=False) podem ser acessadas conforme permissão de franquia
     return True
 
@@ -356,8 +354,7 @@ def pode_criar_nota_interna(current_user: models.Usuario) -> bool:
         "suporte_n2"
     )
 
-=======
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806
+
 def decode_websocket_token(token: str) -> dict:
 
     payload = jwt.decode(
@@ -381,8 +378,4 @@ def decode_websocket_token(token: str) -> dict:
     if payload.get("token_use") != "websocket":
         raise InvalidTokenError("Token não autorizado para WebSocket.")
 
-<<<<<<< HEAD
     return payload
-=======
-    return payload
->>>>>>> 16f2a51bb3087317222397def353d27e75b44806

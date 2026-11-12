@@ -5,6 +5,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import TicketsPage from './pages/TicketsPage'
+import AdminPage from './pages/AdminPage'
 import ClientPortalPage from './pages/ClientPortalPage'
 import ClientTicketsPage from './pages/ClientTicketsPage'
 import FranchisesPage from './pages/FranchisesPage'
@@ -43,11 +44,12 @@ export default function App() {
   const isInternal = isInternalProfile(user?.perfil_sistema)
 
   return <Routes>
-    <Route path="/login" element={token ? <Navigate to="/" replace /> : <LoginPage />} />
+    <Route path="/login" element={token ? <Navigate to "/" replace /> : <LoginPage />} />
     <Route element={<ProtectedRoute />}>
       <Route element={<AppShell />}>
         <Route index element={<RoleHome />} />
         <Route path="tickets" element={isInternal ? <TicketsPage /> : <ClientTicketsPage />} />
+        <Route path="admin" element={AdminPage} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="bot" element={<InternalOnly><BotPage /></InternalOnly>} />
         <Route path="queue" element={<InternalOnly><QueuePage /></InternalOnly>} />

@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [isHovering, setIsHovering] = useState(false)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -24,6 +25,14 @@ export default function LoginPage() {
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Não foi possível autenticar. Verifique sua conexão.')
     }
+  }
+
+  function handleEmailChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setEmail(e.target.value)
+  }
+
+  function handlePasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setPassword(e.target.value)
   }
 
   return (
@@ -48,9 +57,9 @@ export default function LoginPage() {
           <div className="login-heading"><span className="login-kicker">BEM-VINDO DE VOLTA</span><h2>Acesse sua conta</h2><p>Entre com suas credenciais para continuar.</p></div>
           <form onSubmit={submit} className="login-form">
             <label className="field-label" htmlFor="email">E-mail corporativo</label>
-            <div className="input-wrap"><Mail size={18} /><input id="email" type="email" autoComplete="username" placeholder="voce@empresa.com.br" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+            <div className="input-wrap"><Mail size={18} /><input id="email" type="email" autoComplete="username" placeholder="voce@empresa.com.br" value={email} onChange={handleEmailChange} required /></div>
             <div className="password-label-row"><label className="field-label" htmlFor="password">Senha</label></div>
-            <div className="input-wrap"><LockKeyhole size={18} /><input id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Digite sua senha" value={password} onChange={(e) => setPassword(e.target.value)} required /><button type="button" className="show-password" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
+            <div className="input-wrap"><LockKeyhole size={18} /><input id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Digite sua senha" value={password} onChange={handlePasswordChange} required /><button type="button" className="show-password" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
             {error && <div className="form-error" role="alert">{error}</div>}
             <button className="primary-button login-submit" type="submit" disabled={loading}>{loading ? 'Autenticando…' : <>Entrar na plataforma <ArrowRight size={17} /></>}</button>
           </form>
