@@ -763,14 +763,16 @@ def criar_ticket(
 
 def distribuir_ticket(ticket_id: int, db: Session) -> models.Ticket | None:
     """
-    Distribui automaticamente um ticket para o atendente disponível com menor carga.
+    Distribui automaticamente um ticket para o atendente disponível com menor carga,
+    considerando a capacidade máxima configurada.
 
     Lógica:
     1. Busca todos os atendentes com configuração AtendenteConfig
     2. Filtra apenas os disponíveis e ativos
     3. Conta tickets abertos já atribuídos a cada atendente
-    4. Atribui o ticket ao atendente com menor carga (mais disponível)
-    5. Retorna o ticket atualizado ou None se não houver atendentes disponíveis
+    4. Calcula a "carga proporcional" = tickets_atual / capacidade_maxima
+    5. Atribui o ticket ao atendente com menor carga proporcional (mais disponível percentualmente)
+    6. Retorna o ticket atualizado ou None se não houver atendentes disponíveis
     """
     # Buscar atendentes disponíveis com configuração
     atendentes = (
@@ -787,44 +789,50 @@ def distribuir_ticket(ticket_id: int, db: Session) -> models.Ticket | None:
     if not atendentes:
         return None
 
-    # Encontrar atendente com menor carga de trabalho
-    # (menor número de tickets abertos atribuídos)
+    # Encontrar atendente com menor carga proporcional
+    # carga_proporcional = tickets_abertos / capacidade_maxima
+    # Quanto menor, mais disponível é o atendente em porcentagem
     melhor_atendente = None
-    menor_carga = float('inf')
+    melhor_carga_proporcional = float('inf')
 
     for usuario, config in atendentes:
+        capacidade = config.capacidade_maxima or 1  # Evitar divisão por zero
+
         # Contar tickets abertos já atribuídos a este atendente
-        # através da tabela de vínculo usuario_franquia + ticket
-        carga_atual = (
+        # através da franquia do ticket
+        tickets_atribuidos = (
             db.query(models.Ticket)
-            .join(models.UsuarioFranquia,
-                  (models.UsuarioFranquia.usuario_id == models.Ticket.usuario_id)
-                  if hasattr(models.Ticket, 'usuario_id') else True)
             .filter(
                 models.Ticket.status == "Aberto",
-                models.UsuarioFranquia.franquia_id == ticket.franquia_id if hasattr(models.Ticket, 'franquia_id') else True,
-                models.UsuarioFranquia.usuario_id == usuario.id
+                models.Ticket.usuario_id == usuario.id
             )
             .count()
         )
 
-        # Critério: atendente com menor carga atual
-        if carga_atual < menor_carga:
-            menor_carga = carga_atual
+        # Carga proporcional: tickets atuais vs capacidade máxima
+        # Se capacidade=10 e tickets=3, carga=0.3 (30% utilizado, 70% disponível)
+        carga_proporcional = tickets_atribuidos / capacidade
+
+        # Queremos o atendente com menor carga proporcional (mais disponível)
+        if carga_proporcional < melhor_carga_proporcional:
+            melhor_carga_proporcional = carga_proporcional
             melhor_atendente = usuario
 
     if melhor_atendente is None:
         return None
 
-    # Atribuir ticket ao atendente selecionado
-    # Nota: O modelo Ticket tem usuario_id para registrar quem criou,
-    # mas a atribuição para atendente específico seria via UsuarioFranquia.
-    # Por enquanto, apenas registramos que o ticket foi criado/atribuído.
-
+    # Atribuir ticket ao atendente selecionado definindo usuario_id
+    # O usuario_id no ticket registra quem tem a responsabilidade de atendimento
     ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).first()
-    if ticket and ticket.usuario_id is None:
-        # Definir o criador se ainda não foi definido (já feito no criar_ticket)
-        pass
+    if ticket:
+        # Definir o usuário atendente como o responsável pelo ticket
+        # Em um sistema mais completo, isso seria um campo separado de "atendente responsavel"
+        # mas usamos usuario_id como referência para a distribuição automática
+        if ticket.usuario_id is None:
+            ticket.usuario_id = melhor_atendente.id
+
+    db.commit()
+    db.refresh(ticket)
 
     return ticket
 
@@ -882,6 +890,88 @@ def obter_ticket(
     )
 
     return db_ticket
+
+
+@app.patch(
+    "/mensagens/{mensagem_id}",
+    response_model=schemas.MensagemResponse
+)
+def atualizar_mensagem(
+    mensagem_id: int,
+    mensagem_update: schemas.MensagemUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.Usuario = Depends(get_current_user)
+):
+
+    mensagem = (
+        db.query(models.Mensagem)
+        .filter(models.Mensagem.id == mensagem_id)
+        .first()
+    )
+
+    if not mensagem:
+        raise HTTPException(
+            status_code=404,
+            detail="Mensagem não encontrada."
+        )
+
+    # Verificar autorização: apenas criador ou suporte/system pode editar
+    pode_editar = (
+        current_user.perfil_sistema in ("administrador", "suporte_n1", "suporte_n2")
+        or mensagem.remetente_id == current_user.id
+    )
+
+    if not pode_editar:
+        raise HTTPException(
+            status_code=403,
+            detail="Você não tem permissão para editar esta mensagem."
+        )
+
+    update_data = mensagem_update.model_dump(exclude_unset=True, exclude_none=True)
+
+    for campo, valor in update_data.items():
+        setattr(mensagem, campo, valor)
+
+    db.commit()
+    db.refresh(mensagem)
+
+    return mensagem
+
+
+@app.delete(
+    "/mensagens/{mensagem_id}",
+    status_code=204
+)
+def deletar_mensagem(
+    mensagem_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.Usuario = Depends(get_current_user)
+):
+
+    mensagem = (
+        db.query(models.Mensagem)
+        .filter(models.Mensagem.id == mensagem_id)
+        .first()
+    )
+
+    if not mensagem:
+        raise HTTPException(
+            status_code=404,
+            detail="Mensagem não encontrada."
+        )
+
+    # Verificar autorização: apenas suporte/system pode deletar mensagens
+    # Usuários de franquia não podem deletar mensagens (imutabilidade operacional)
+    if current_user.perfil_sistema not in ("administrador", "suporte_n1", "suporte_n2"):
+        raise HTTPException(
+            status_code=403,
+            detail="Apenas administradores e suporte podem excluir mensagens."
+        )
+
+    db.delete(mensagem)
+    db.commit()
+
+    return None
 
 
 @app.get(

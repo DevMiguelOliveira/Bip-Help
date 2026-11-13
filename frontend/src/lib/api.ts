@@ -42,11 +42,21 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}, tok
   if (options.body && !(options.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
-  const response = await fetch(apiUrl(path), {
-    ...options,
-    headers,
-    credentials: 'same-origin',
-  })
+
+  // Timeout explícito de 15 segundos para todas as requisições HTTP
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout de 15s na requisição HTTP')), 15_000)
+  )
+
+  const response = await Promise.race([
+    fetch(apiUrl(path), {
+      ...options,
+      headers,
+      credentials: 'same-origin',
+    }),
+    timeoutPromise
+  ])
+
   return parseResponse<T>(response)
 }
 

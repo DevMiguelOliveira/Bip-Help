@@ -56,6 +56,10 @@ class MensagemCreate(BaseModel):
     texto: str
 
 
+class MensagemUpdate(BaseModel):
+    texto: str | None = None
+
+
 class MensagemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     interna: bool = False
