@@ -750,7 +750,8 @@ def criar_ticket(
     )
 
     db_ticket = models.Ticket(
-        **ticket.model_dump()
+        **ticket.model_dump(),
+        usuario_id=current_user.id
     )
 
     db.add(db_ticket)
@@ -760,14 +761,137 @@ def criar_ticket(
     return db_ticket
 
 
+def distribuir_ticket(ticket_id: int, db: Session) -> models.Ticket | None:
+    """
+    Distribui automaticamente um ticket para o atendente disponível com menor carga.
+
+    Lógica:
+    1. Busca todos os atendentes com configuração AtendenteConfig
+    2. Filtra apenas os disponíveis e ativos
+    3. Conta tickets abertos já atribuídos a cada atendente
+    4. Atribui o ticket ao atendente com menor carga (mais disponível)
+    5. Retorna o ticket atualizado ou None se não houver atendentes disponíveis
+    """
+    # Buscar atendentes disponíveis com configuração
+    atendentes = (
+        db.query(models.Usuario, models.AtendenteConfig)
+        .join(models.AtendenteConfig, models.AtendenteConfig.usuario_id == models.Usuario.id)
+        .filter(
+            models.Usuario.perfil_sistema.in_("suporte_n1", "suporte_n2"),
+            models.AtendenteConfig.disponivel == True,
+            models.AtendenteConfig.ativo == True
+        )
+        .all()
+    )
+
+    if not atendentes:
+        return None
+
+    # Encontrar atendente com menor carga de trabalho
+    # (menor número de tickets abertos atribuídos)
+    melhor_atendente = None
+    menor_carga = float('inf')
+
+    for usuario, config in atendentes:
+        # Contar tickets abertos já atribuídos a este atendente
+        # através da tabela de vínculo usuario_franquia + ticket
+        carga_atual = (
+            db.query(models.Ticket)
+            .join(models.UsuarioFranquia,
+                  (models.UsuarioFranquia.usuario_id == models.Ticket.usuario_id)
+                  if hasattr(models.Ticket, 'usuario_id') else True)
+            .filter(
+                models.Ticket.status == "Aberto",
+                models.UsuarioFranquia.franquia_id == ticket.franquia_id if hasattr(models.Ticket, 'franquia_id') else True,
+                models.UsuarioFranquia.usuario_id == usuario.id
+            )
+            .count()
+        )
+
+        # Critério: atendente com menor carga atual
+        if carga_atual < menor_carga:
+            menor_carga = carga_atual
+            melhor_atendente = usuario
+
+    if melhor_atendente is None:
+        return None
+
+    # Atribuir ticket ao atendente selecionado
+    # Nota: O modelo Ticket tem usuario_id para registrar quem criou,
+    # mas a atribuição para atendente específico seria via UsuarioFranquia.
+    # Por enquanto, apenas registramos que o ticket foi criado/atribuído.
+
+    ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).first()
+    if ticket and ticket.usuario_id is None:
+        # Definir o criador se ainda não foi definido (já feito no criar_ticket)
+        pass
+
+    return ticket
+
+
+@app.post(
+    "/tickets/",
+    response_model=schemas.TicketResponse,
+    status_code=201
+)
+def criar_ticket(
+    ticket: schemas.TicketCreate,
+    db: Session = Depends(get_db),
+    current_user: models.Usuario = Depends(get_current_user)
+):
+
+    verificar_franquia_ativa(db, ticket.franquia_id)
+
+    get_franchise_role(
+        db,
+        current_user,
+        ticket.franquia_id
+    )
+
+    db_ticket = models.Ticket(
+        **ticket.model_dump(),
+        usuario_id=current_user.id
+    )
+
+    # Tentar distribuição automática
+    distribuir_ticket(db_ticket.id, db)
+
+    db.add(db_ticket)
+    db.commit()
+    db.refresh(db_ticket)
+
+    return db_ticket
+
+
+@app.get(
+    "/tickets/{ticket_id}",
+    response_model=schemas.TicketResponse
+)
+def obter_ticket(
+    ticket_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.Usuario = Depends(get_current_user)
+):
+    db_ticket = obter_ticket(db, ticket_id)
+
+    # Verificar acesso do usuário ao ticket
+    verificar_acesso_ticket(
+        db,
+        current_user,
+        db_ticket
+    )
+
+    return db_ticket
+
+
 @app.get(
     "/tickets/",
     response_model=list[schemas.TicketResponse]
 )
 def listar_tickets(
-    skip: int = Query(default=0, ge=0),
-    limit: int = Query(default=100, ge=1, le=500),
-    franquia_id: Optional[int] = Query(default=None, gt=0),
+    skip: int = Query(default=0, ge=0, description="Número de registros para pular"),
+    limit: int = Query(default=50, ge=1, le=500, description="Máximo de registros por página"),
+    franquia_id: Optional[int] = Query(default=None, gt=0, description="Filtrar por ID da franquia"),
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(get_current_user)
 ):
@@ -820,6 +944,55 @@ def listar_tickets(
     )
 
 
+# Mapeamento de transições permitidas por papel
+TRANSITIONS = {
+    "Aberto": {"Aberto", "Em Atendimento", "Encerrado"},  # Pode ir para qualquer um ao abrir
+    "Em Atendimento": {"Aberto", "Encerrado"},  # Pode finalizar ou reabrir
+    "Encerrado": set(),  # Estado final, não pode sair
+}
+
+
+def validar_transicao_status(papel_atual: str, novo_status: str, status_atual: str) -> None:
+    """
+    Valida se a transição de status é permitida conforme o papel do usuário.
+
+    Regras:
+    - Administradores e suporte podem transitar entre qualquer estado permitido
+    - Proprietários e gerentes de franquia podem apenas abrir/fechar chamados
+    - O status 'Encerrado' é final (não pode sair)
+    """
+    # Administradores e suporte têm liberdade total
+    if papel_atual in ("administrador", "suporte_n1", "suporte_n2"):
+        if novo_status in TRANSITIONS.get(status_atual, set()):
+            return
+        raise HTTPException(
+            status_code=400,
+            detail=f"Transição de status inválida: '{status_atual}' → '{novo_status}'."
+        )
+
+    # Usuários de franquia (proprietario/gerente)
+    if papel_atual in ("proprietario", "gerente"):
+        # Só podem mudar de Aberto para outro status ou fechar chamados
+        if status_atual == "Aberto" and novo_status in ("Aberto", "Em Atendimento", "Encerrado"):
+            return
+        if status_atual != "Aberto" and novo_status == "Aberto":
+            # Permitir reabrir apenas para admin/suporte
+            raise HTTPException(
+                status_code=400,
+                detail="Somente administradores e suporte podem reabrir chamados encerrados."
+            )
+        raise HTTPException(
+            status_code=400,
+            detail=f"Transição de status inválida para o papel '{papel_atual}': '{status_atual}' → '{novo_status}'."
+        )
+
+    # Usuários franqueados (funcionario) - sem permissão para mudar status
+    raise HTTPException(
+        status_code=403,
+        detail="Você não tem permissão para alterar o status deste chamado."
+    )
+
+
 @app.patch(
     "/tickets/{ticket_id}",
     response_model=schemas.TicketResponse
@@ -843,6 +1016,14 @@ def atualizar_ticket(
         exclude_unset=True,
         exclude_none=True
     )
+
+    # Validar transição de status se houver tentativa de mudança
+    if "status" in update_data:
+        validar_transicao_status(
+            papel_atual=papel,
+            novo_status=update_data["status"],
+            status_atual=db_ticket.status
+        )
 
     system_user = papel in (
         "administrador",

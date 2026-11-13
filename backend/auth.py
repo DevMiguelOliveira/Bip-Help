@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -12,6 +13,15 @@ from sqlalchemy.orm import Session
 
 from database import SessionLocal
 import models
+
+# Carregar segredo JWT do ambiente
+JWT_SECRET = os.getenv("JWT_SECRET")
+
+if not JWT_SECRET:
+    raise RuntimeError("Variável de ambiente JWT_SECRET não definida.")
+
+if len(JWT_SECRET) < 64:
+    raise RuntimeError("Chave JWT inválida ou muito curta (mínimo 64 caracteres).")
 
 
 # =========================================================
