@@ -17,7 +17,7 @@ export default function TicketsPage() {
   const [showNew, setShowNew] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const { data: franchises = [] } = useQuery({ queryKey: ['franchises'], queryFn: () => getFranchises(token!), enabled: !!token })
-  const { data: tickets = [], isLoading, isError, error, refetch } = useQuery({ queryKey: ['tickets'], queryFn: () => getTickets(token!), enabled: !!token, refetchInterval: 15_000, refetchIntervalInBackground: false })
+  const { data: tickets = [], isLoading, isError, error, refetch } = useQuery({ queryKey: ['tickets'], queryFn: () => getTickets(token!, undefined, status, { skip: 0, limit: 50 }), enabled: !!token, refetchInterval: 15_000, refetchIntervalInBackground: false })
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {

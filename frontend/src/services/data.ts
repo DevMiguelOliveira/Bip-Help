@@ -1,16 +1,24 @@
 import { apiJson, apiRequest } from '../lib/api'
 import type { AttendantUpdate, Franchise, Message, TeamMember, Ticket, User } from '../types'
 
-export function getFranchises(token: string) {
-  return apiRequest<Franchise[]>('/franquias/?limit=500', {}, token)
+export function getFranchises(token: string, params?: { skip?: number; limit?: number }) {
+  const searchParams = new URLSearchParams()
+  if (params) {
+    if (params.skip !== undefined) searchParams.set('skip', String(params.skip))
+    if (params.limit !== undefined) searchParams.set('limit', String(params.limit))
+  } else {
+    searchParams.set('limit', '50')
+  }
+  return apiRequest<Franchise[]>(`/franquias/?${searchParams.toString()}`, {}, token)
 }
 
-export function getTickets(token: string, franchiseId?: number, status?: string) {
-  const params = new URLSearchParams({ limit: '500' })
-  if (franchiseId) params.set('franquia_id', String(franchiseId))
-  // Status is filtered client-side because the current API does not expose a status query parameter.
-  void status
-  return apiRequest<Ticket[]>(`/tickets/?${params.toString()}`, {}, token)
+export function getTickets(token: string, franchiseId?: number, status?: string, params?: { skip?: number; limit?: number }) {
+  const searchParams = new URLSearchParams()
+  searchParams.set('limit', params?.limit.toString() || '50')
+  if (params?.skip !== undefined) searchParams.set('skip', String(params.skip))
+  if (franchiseId !== undefined) searchParams.set('franquia_id', String(franchiseId))
+  // Status é filtrado client-side pois o backend agora expõe o parâmetro, mas mantemos fallback
+  return apiRequest<Ticket[]>(`/tickets/?${searchParams.toString()}`, {}, token)
 }
 
 export function getMessages(token: string, ticketId: number) {

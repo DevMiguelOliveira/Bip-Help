@@ -44,10 +44,16 @@ class Ticket(Base):
     descricao = Column(Text)
     status = Column(String, default="Aberto")
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
 
     franquia = relationship(
         "Franquia",
         back_populates="tickets"
+    )
+
+    usuario = relationship(
+        "Usuario",
+        back_populates="tickets_abertos"
     )
 
     mensagens = relationship(
@@ -122,6 +128,12 @@ class Usuario(Base):
         "UsuarioFranquia",
         back_populates="usuario",
         cascade="all, delete-orphan"
+    )
+
+    tickets_abertos = relationship(
+        "Ticket",
+        back_populates="usuario",
+        foreign_keys="Ticket.usuario_id"
     )
 
 

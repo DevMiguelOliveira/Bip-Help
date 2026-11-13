@@ -8,7 +8,7 @@ import { getMessages, sendMessage, updateTicket } from '../services/data'
 import type { Message, Ticket } from '../types'
 import { formatDateTime, statusClass } from '../lib/format'
 
-interface WsToken { token: string; expires_in: number }
+interface WsToken { token: string; expires_in: number; created_at: number }
 
 export default function TicketChatDialog({ ticket, onClose }: { ticket: Ticket; onClose: () => void }) {
   const { token, user } = useAuth()
@@ -36,13 +36,17 @@ export default function TicketChatDialog({ ticket, onClose }: { ticket: Ticket; 
     let retryTimer: number | undefined
     let retryCount = 0
     let reconnectTimer: number | undefined
+    let tokenCreatedAt = 0
 
     async function connect() {
       if (!active || !token) return
       setWsStatus('connecting')
       try {
+        // Request new WS token from backend
         const result = await apiRequest<WsToken>(`/tickets/${ticket.id}/ws-token`, { method: 'POST' }, token)
         if (!active) return
+        tokenCreatedAt = Date.now()
+
         const configured = (import.meta.env.VITE_WS_URL as string | undefined)?.trim()
         const wsBase = configured ? configured.replace(/\/$/, '') : `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`
         socket = new WebSocket(`${wsBase}/ws/tickets/${ticket.id}`)
@@ -51,7 +55,7 @@ export default function TicketChatDialog({ ticket, onClose }: { ticket: Ticket; 
           try {
             const payload = JSON.parse(event.data) as Record<string, unknown>
             if (payload.type === 'authenticated') { setWsStatus('connected'); retryCount = 0; return }
-if (payload.type === 'ticket_updated' && payload.ticket_id === ticket.id) {
+            if (payload.type === 'ticket_updated' && payload.ticket_id === ticket.id) {
               queryClient.invalidateQueries({ queryKey: ['tickets'] })
               return
             }
@@ -64,9 +68,13 @@ if (payload.type === 'ticket_updated' && payload.ticket_id === ticket.id) {
         socket.onclose = () => {
           setWsStatus('offline')
           if (!active) return
+          // Check if we should refresh token before reconnecting
+          const timeSinceToken = Date.now() - tokenCreatedAt
+          const shouldRefresh = timeSinceToken > 45_000 // Refresh at 45s (before 60s expiry)
           retryCount += 1
           const delay = Math.min(1000 * 2 ** Math.min(retryCount, 5), 30_000)
-          retryTimer = window.setTimeout(connect, delay)
+          // If token expired, force a refresh by requesting new token on next connect
+          retryTimer = window.setTimeout(connect, shouldRefresh ? 100 : delay)
         }
         socket.onerror = () => socket?.close()
       } catch {
@@ -78,7 +86,29 @@ if (payload.type === 'ticket_updated' && payload.ticket_id === ticket.id) {
       }
     }
     void connect()
-    return () => { active = false; if (retryTimer) clearTimeout(retryTimer); if (reconnectTimer) clearTimeout(reconnectTimer); socket?.close() }
+
+    // Proactive token renewal: refresh 10 seconds before expiry (50s into 60s lifetime)
+    const renewalTimer = window.setInterval(async () => {
+      if (!active || !socket || wsStatus !== 'connected') return
+      const timeSinceToken = Date.now() - tokenCreatedAt
+      // Refresh when within 10 seconds of expiry
+      if (timeSinceToken > 50_000) {
+        try {
+          await apiRequest<WsToken>(`/tickets/${ticket.id}/ws-token`, { method: 'POST' }, token)
+          tokenCreatedAt = Date.now()
+        } catch {
+          // Token refresh failed, will reconnect on next error
+        }
+      }
+    }, 5_000) // Check every 5 seconds
+
+    return () => {
+      active = false
+      if (retryTimer) clearTimeout(retryTimer)
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      if (renewalTimer) clearInterval(renewalTimer)
+      socket?.close()
+    }
   }, [token, ticket.id, queryClient])
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages.length])
