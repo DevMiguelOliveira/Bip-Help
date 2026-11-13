@@ -25,6 +25,10 @@ export function getMessages(token: string, ticketId: number) {
   return apiRequest<Message[]>(`/tickets/${ticketId}/mensagens/`, {}, token)
 }
 
+export function getMessage(token: string, mensagemId: number) {
+  return apiRequest<Message>(`/mensagens/${mensagemId}`, {}, token)
+}
+
 export function createTicket(token: string, franchiseId: number, description: string) {
   return apiJson<Ticket>('/tickets/', 'POST', { franquia_id: franchiseId, descricao: description }, token)
 }

@@ -975,6 +975,59 @@ def deletar_mensagem(
 
 
 @app.get(
+    "/mensagens/{mensagem_id}",
+    response_model=schemas.MensagemResponse
+)
+def obter_mensagem(
+    mensagem_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.Usuario = Depends(get_current_user)
+):
+    mensagem = (
+        db.query(models.Mensagem)
+        .filter(models.Mensagem.id == mensagem_id)
+        .first()
+    )
+
+    if not mensagem:
+        raise HTTPException(
+            status_code=404,
+            detail="Mensagem não encontrada."
+        )
+
+    # Verificar acesso: remetente do ticket ou suporte/system podem ver
+    if current_user.perfil_sistema not in (
+        "administrador",
+        "suporte_n1",
+        "suporte_n2"
+    ):
+        # Verificar se o usuário tem vinculo com a franquia do ticket
+        # Acesso se: remetente do ticket tem vinculo com mesma franquia
+        # ou se é o remetente da mensagem
+        acesso = False
+        if mensagem.remetente_id == current_user.id:
+            acesso = True
+        else:
+            # Verificar vinculo via ticket
+            try:
+                acesso = verificar_acesso_ticket(
+                    db,
+                    current_user,
+                    mensagem.ticket
+                )
+            except Exception:
+                acesso = False
+
+        if not acesso:
+            raise HTTPException(
+                status_code=403,
+                detail="Você não tem acesso a esta mensagem."
+            )
+
+    return mensagem
+
+
+@app.get(
     "/tickets/",
     response_model=list[schemas.TicketResponse]
 )
