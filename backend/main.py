@@ -982,11 +982,16 @@ def listar_tickets(
     skip: int = Query(default=0, ge=0, description="Número de registros para pular"),
     limit: int = Query(default=50, ge=1, le=500, description="Máximo de registros por página"),
     franquia_id: Optional[int] = Query(default=None, gt=0, description="Filtrar por ID da franquia"),
+    status: Optional[TicketStatus] = Query(default=None, gt=0, description="Filtrar por status do chamado"),
     db: Session = Depends(get_db),
     current_user: models.Usuario = Depends(get_current_user)
 ):
 
     query = db.query(models.Ticket)
+
+    # Filtro por status (novo parâmetro)
+    if status:
+        query = query.filter(models.Ticket.status == status)
 
     if current_user.perfil_sistema not in (
         "administrador",
