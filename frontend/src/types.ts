@@ -51,6 +51,7 @@ export interface Ticket {
   status: TicketStatus
   criado_em: string
   assignee_id?: string | null
+  enviado_para_cliente?: boolean
 }
 
 export interface Message {

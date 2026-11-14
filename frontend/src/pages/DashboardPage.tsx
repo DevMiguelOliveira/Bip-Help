@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowRight, CheckCircle2, Clock3, Filter, MessageSquare, Plus, RefreshCw, Ticket, TrendingUp, Building2, Eye, AlertCircle, Loader2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Clock3, Filter, MessageSquare, Plus, RefreshCw, Ticket, TrendingUp, Building2, Eye, AlertCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getFranchises, getTickets } from '../services/data'

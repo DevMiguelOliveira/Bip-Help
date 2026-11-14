@@ -14,10 +14,10 @@ export function getFranchises(token: string, params?: { skip?: number; limit?: n
 
 export function getTickets(token: string, franchiseId?: number, status?: string, params?: { skip?: number; limit?: number }) {
   const searchParams = new URLSearchParams()
-  searchParams.set('limit', params?.limit.toString() || '50')
+  searchParams.set('limit', String(params?.limit ?? 50))
   if (params?.skip !== undefined) searchParams.set('skip', String(params.skip))
   if (franchiseId !== undefined) searchParams.set('franquia_id', String(franchiseId))
-  // Status é filtrado client-side pois o backend agora expõe o parâmetro, mas mantemos fallback
+  if (status !== undefined && status !== 'all') searchParams.set('status', status)
   return apiRequest<Ticket[]>(`/tickets/?${searchParams.toString()}`, {}, token)
 }
 

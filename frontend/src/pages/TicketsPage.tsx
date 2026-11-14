@@ -1,27 +1,25 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Filter, Plus, Search, Ticket as TicketIcon, RefreshCw, MessageCircle } from 'lucide-react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { Filter, Plus, Search, Ticket as TicketIcon, Loader2, AlertCircle, MessageCircle } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getFranchises, getTickets } from '../services/data'
-import NewTicketDialog from './NewTicketDialog'
-import { formatDate, statusClass } from '../lib/format'
+import { formatDate } from '../lib/format'
 
 export default function TicketsPage() {
   const { token } = useAuth()
-  const [params, setParams] = useSearchParams()
+  const [, setParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('all')
   const [franchise, setFranchise] = useState('all')
-  const [showNew, setShowNew] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const { data: franchises = [] } = useQuery({ queryKey: ['franchises'], queryFn: () => getFranchises(token!), enabled: !!token })
-  const { data: tickets = [], isLoading, isError, error, refetch } = useQuery({ queryKey: ['tickets'], queryFn: () => getTickets(token!, undefined, status, { skip: 0, limit: 50 }), enabled: !!token, refetchInterval: 15_000, refetchIntervalInBackground: false })
+  const { data: tickets = [], isLoading, isError, error } = useQuery({ queryKey: ['tickets'], queryFn: () => getTickets(token!, undefined, status, { skip: 0, limit: 50 }), enabled: !!token, refetchInterval: 15_000, refetchIntervalInBackground: false })
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     // Contador de tickets não lidos
-    const count = tickets.filter((t) => t.status === 'Aberto' && !t.enviado_para_cliente).length
+    const count = tickets.filter((t) => t.status === 'Aberto').length
     setUnreadCount(count)
   }, [tickets])
 
@@ -31,13 +29,6 @@ export default function TicketsPage() {
     const matchesFranchise = franchise === 'all' || String(ticket.franquia_id) === franchise
     return matchesSearch && matchesStatus && matchesFranchise
   }).sort((a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime()), [tickets, search, status, franchise])
-
-  const selectedId = Number(params.get('selected')) || null
-  const selectedTicket = selectedId ? tickets.find((t) => t.id === selectedId) : undefined
-  const navigate = useNavigate()
-
-  const openTicket = (id: number) => setParams({ selected: String(id) })
-  const closeTicket = () => setParams({})
 
   const viewTicket = (id: number) => {
     setParams({ selected: String(id) })
@@ -57,7 +48,7 @@ export default function TicketsPage() {
           <p>{tickets.length} resultado(s) na visualização atual.</p>
         </div>
         <div className="page-header-right">
-          <button className="secondary-button" onClick={() => setShowNew(true)}><Plus size={16} /> Novo chamado</button>
+          <button className="secondary-button" onClick={() => setShowFilters(true)}><Plus size={16} /> Novo chamado</button>
           <button className="secondary-button" onClick={() => setShowFilters(true)}><Filter size={16} /> Filtros</button>
         </div>
       </header>
@@ -66,9 +57,9 @@ export default function TicketsPage() {
       <section className="ticket-summary-row">
         {isLoading ? (
           <div className="skeleton-grid">
-            <div className="skeleton-card" width={80} /><div className="skeleton-card" width={60} /><div className="skeleton-card" width={100} />
-            <div className="skeleton-card" width={40} /><div className="skeleton-card" width={60} /><div className="skeleton-card" width={80} />
-            <div className="skeleton-card" width={40} /><div className="skeleton-card" width={60} /><div className="skeleton-card" width={80} />
+            <div className="skeleton-card" style={{width: 80}} /><div className="skeleton-card" style={{width: 60}} /><div className="skeleton-card" style={{width: 100}} />
+            <div className="skeleton-card" style={{width: 40}} /><div className="skeleton-card" style={{width: 60}} /><div className="skeleton-card" style={{width: 80}} />
+            <div className="skeleton-card" style={{width: 40}} /><div className="skeleton-card" style={{width: 60}} /><div className="skeleton-card" style={{width: 80}} />
           </div>
         ) : (
           <>

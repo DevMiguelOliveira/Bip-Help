@@ -26,7 +26,7 @@ export default function QueuePage() {
         const total = unassigned.length
         const waiting = unassigned.length
         const highestWait = total > 0
-          ? Math.max(...unassigned.map((t) => new Date(t.criado_em).getTime() - new Date().getTime()) * -1)
+          ? Math.max(...unassigned.map((t) => (new Date().getTime() - new Date(t.criado_em).getTime())))
           : 0
         const notified = Math.floor(total / 2)
 
@@ -99,7 +99,7 @@ export default function QueuePage() {
               </div>
               <div className="p-4 rounded-lg bg-green-50/30">
                 <div className="font-medium">Não atribuídos</div>
-                <div className="text-2xl font-bold text-green-600">{summary.unassignedCount}</div>
+                <div className="text-2xl font-bold text-green-600">{summary.waiting}</div>
               </div>
             </div>
 

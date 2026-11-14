@@ -1,19 +1,18 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Sparkles } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { ApiRequestError } from '../lib/api'
 
 export default function LoginPage() {
-  const { login, loading } = useAuth()
+  const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [isHovering, setIsHovering] = useState(false)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -80,7 +79,7 @@ export default function LoginPage() {
                   className="toggle-password"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? EyeOff : Eye}
+                  {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
             </div>

@@ -4,12 +4,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FileImage, LoaderCircle, MessageCircle, Paperclip, Send, ShieldCheck, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { apiRequest, privateFileUrl } from '../lib/api'
-import { getMessages, sendMessage, updateTicket, getMessage } from '../services/data'
+import { getMessages, sendMessage, updateTicket } from '../services/data'
 import type { Message, Ticket } from '../types'
 import { formatDateTime, statusClass } from '../lib/format'
 
 interface WsToken { token: string; expires_in: number; created_at: number }
-interface SingleMessage { id: number; texto: string; url_anexo: string; interna: boolean; criado_em: string; remetente: string; remetente_id: number | null }
 
 export default function TicketChatDialog({ ticket, onClose }: { ticket: Ticket; onClose: () => void }) {
   const { token, user } = useAuth()
@@ -44,7 +43,7 @@ export default function TicketChatDialog({ ticket, onClose }: { ticket: Ticket; 
       setWsStatus('connecting')
       try {
         // Request new WS token from backend
-        const result = await apiRequest<WsToken>(`/tickets/${ticket.id}/ws-token`, { method: 'POST' }, token)
+        const result = await apiRequest<WsToken>(`/tickets/${ticket.id}/ws-token`, { method: 'POST' }, token!)
         if (!active) return
         tokenCreatedAt = Date.now()
 
@@ -103,7 +102,7 @@ export default function TicketChatDialog({ ticket, onClose }: { ticket: Ticket; 
       // Refresh when within 10 seconds of expiry
       if (timeSinceToken > 50_000) {
         try {
-          await apiRequest<WsToken>(`/tickets/${ticket.id}/ws-token`, { method: 'POST' }, token)
+          await apiRequest<WsToken>(`/tickets/${ticket.id}/ws-token`, { method: 'POST' }, token!)
           tokenCreatedAt = Date.now()
         } catch {
           // Token refresh failed, will reconnect on next error
