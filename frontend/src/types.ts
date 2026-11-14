@@ -50,6 +50,7 @@ export interface Ticket {
   descricao: string
   status: TicketStatus
   criado_em: string
+  assignee_id?: string | null
 }
 
 export interface Message {

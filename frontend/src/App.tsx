@@ -43,22 +43,75 @@ export default function App() {
   const { token, user } = useAuth()
   const isInternal = isInternalProfile(user?.perfil_sistema)
 
-  return <Routes>
-    <Route path="/login" element={token ? <Navigate to "/" replace /> : <LoginPage />} />
-    <Route element={<ProtectedRoute />}>
-      <Route element={<AppShell />}>
-        <Route index element={<RoleHome />} />
-        <Route path="tickets" element={isInternal ? <TicketsPage /> : <ClientTicketsPage />} />
-        <Route path="admin" element={AdminPage} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="bot" element={<InternalOnly><BotPage /></InternalOnly>} />
-        <Route path="queue" element={<InternalOnly><QueuePage /></InternalOnly>} />
-        <Route path="team" element={<InternalOnly><TeamPage /></InternalOnly>} />
-        <Route path="performance" element={<InternalOnly><PerformancePage /></InternalOnly>} />
-        <Route path="franchises" element={<InternalOnly><FranchisesPage /></InternalOnly>} />
-        <Route path="users" element={<AdminOnly><UsersPage /></AdminOnly>} />
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={token ? <Navigate to="/" replace /> : <LoginPage />}
+      />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppShell />}>
+          <Route index element={<RoleHome />} />
+          <Route
+            path="tickets"
+            element={isInternal ? <TicketsPage /> : <ClientTicketsPage />}
+          />
+          <Route path="admin" element={<AdminPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route
+            path="bot"
+            element={
+              <InternalOnly>
+                <BotPage />
+              </InternalOnly>
+            }
+          />
+          <Route
+            path="queue"
+            element={
+              <InternalOnly>
+                <QueuePage />
+              </InternalOnly>
+            }
+          />
+          <Route
+            path="team"
+            element={
+              <InternalOnly>
+                <TeamPage />
+              </InternalOnly>
+            }
+          />
+          <Route
+            path="performance"
+            element={
+              <InternalOnly>
+                <PerformancePage />
+              </InternalOnly>
+            }
+          />
+          <Route
+            path="franchises"
+            element={
+              <InternalOnly>
+                <FranchisesPage />
+              </InternalOnly>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <AdminOnly>
+                <UsersPage />
+              </AdminOnly>
+            }
+          />
+        </Route>
       </Route>
-    </Route>
-    <Route path="*" element={<Navigate to={token ? '/' : '/login'} replace />} />
-  </Routes>
+      <Route
+        path="*"
+        element={<Navigate to={token ? '/' : '/login'} replace />}
+      />
+    </Routes>
+  )
 }

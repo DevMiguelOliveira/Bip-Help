@@ -1,13 +1,13 @@
-import { useMemo, useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Clock3, Inbox, Bell, ShieldCheck, TrendingUp, Loader2, MessageCircle, AlertCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Clock3 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getTickets } from '../services/data'
 import { formatDate } from '../lib/format'
+import type { Ticket } from '../types'
 
 export default function QueuePage() {
   const { token } = useAuth()
-  const [queue, setQueue] = useState<QueueTicket[]>([])
+  const [queue, setQueue] = useState<Ticket[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [unassignedCount, setUnassignedCount] = useState(0)
   const [summary, setSummary] = useState({ total: 0, waiting: 0, highestWait: 0, notified: 0 })
@@ -17,26 +17,18 @@ export default function QueuePage() {
       setIsLoading(true)
       try {
         const tickets = await getTickets(token!)
-        const now = new Date()
         const unassigned = tickets.filter((t) => !t.assignee_id && t.status === 'Aberto')
 
-        setQueue(
-          unassigned
-            .sort((a, b) => {
-              const aTime = new Date(a.criado_em).getTime()
-              const bTime = new Date(b.criado_em).getTime()
-              return aTime - bTime // Ordenar por mais antigo primeiro
-            }
-        )
+        setQueue(unassigned.sort((a, b) => new Date(a.criado_em).getTime() - new Date(b.criado_em).getTime()))
         setUnassignedCount(unassigned.length)
 
         // Summary calculations
         const total = unassigned.length
         const waiting = unassigned.length
         const highestWait = total > 0
-          ? Math.max(...unassigned.map((t) => new Date().getTime() - new Date(t.criado_em).getTime()))
+          ? Math.max(...unassigned.map((t) => new Date(t.criado_em).getTime() - new Date().getTime()) * -1)
           : 0
-        const notified = Math.floor(total / 2) // Simulação: metade notificada
+        const notified = Math.floor(total / 2)
 
         setSummary({ total, waiting, highestWait, notified })
       } catch (error) {
@@ -45,6 +37,7 @@ export default function QueuePage() {
         setIsLoading(false)
       }
     }
+
     loadQueue()
 
     // Atualizar a cada 30 segundos
@@ -52,114 +45,72 @@ export default function QueuePage() {
     return () => clearInterval(interval)
   }, [token])
 
-  interface QueueTicket {
-    id: number
-    descricao: string
-    criado_em: string
-    status: string
-    assignee_id: string | null
-    prioridade?: 'baixa' | 'media' | 'alta' | 'urgente'
-  }
-
-  const formattedTickets = useMemo(() =>
-    queue.map((t) => ({
-      ...t,
-      tempo_espera: `${Math.floor(
-        (new Date().getTime() - new Date(t.criado_em).getTime()) / 60000
-      )} min`
-    })),
-    [queue]
-  )
-
-  const statusStyles = {
-    'Aberto': 'amber',
-    'Em Atendimento': 'violet',
-    'Encerrado': 'green'
-  }
-
-  return <div className="page-stack">
-    <section className="welcome-row"><div><div className="eyebrow muted-eyebrow">DISTRIBUIÇÃO DE ATENDIMENTO</div><h1>Fila de espera</h1><p>Chamados aguardando disponibilidade de um atendente do Suporte N1 ou N2.</p></div><span className="workspace-status-pill"><Clock3 size={14}/> Em preparação</span></section>
-
-    {/* Summary Cards */}
-    <section className="queue-summary-grid">
-      <div className="queue-summary-card"><span>Na fila</span><strong>{summary.total}</strong><small>{summary.waiting} aguardando atendimento</small></div>
-      <div className="queue-summary-card"><span>Maior tempo de espera</span><strong>{summary.highestWait > 0 ? `${summary.highestWait} min` : '—'}</strong><small>Desde o último chamado sem atendente</small></div>
-      <div className="queue-summary-card"><span>Supervisores notificados</span><strong>{summary.notified}</strong><small>Profissionais alertados</small></div>
-    </section>
-
-    {/* Fila de Chamados */}
-    <section className="panel queue-panel">
-      {isLoading ? (
-        <div className="loading-panel">Carregando fila…</div>
-      ) : queue.length === 0 ? (
-        <section className="panel queue-empty-panel">
-          <div className="queue-empty-icon"><Inbox size={26}/></div>
-          <h2>Nenhum chamado na fila</h2>
-          <p>Todos os chamados estão sendo atendidos ou não há chamados abertos sem assignee.</p>
-        </section>
-      ) : (
-        <div className="recent-table-wrap">
-          <table className="data-table tickets-data-table">
-            <thead>
-              <tr>
-                <th>Chamado</th>
-                <th>Descrição</th>
-                <th>Tempo de Fila</th>
-                <th>Prioridade</th>
-                <th>Data Abertura</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {formattedTickets.map((t) => (
-                <tr key={t.id} className="clickable-row">
-                  <td><span className="ticket-code">#{String(t.id).padStart(5, '0')}</span></td>
-                  <td><span className="description-cell">{t.descricao}</span></td>
-                  <td><span className="status-badge">{t.tempo_espera}</span></td>
-                  <td>
-                    <span className={`status-badge ${t.prioridade === 'urgente' ? 'red' : t.prioridade === 'alta' ? 'violet' : t.prioridade === 'media' ? 'amber' : 'green'}`}>
-                      {t.prioridade || '—'}
-                    </span>
-                  </td>
-                  <td className="date-cell">{formatDate(t.criado_em)}</td>
-                  <td>
-                    <button className="table-action" title="Transferir para atendente">
-                      <MessageCircle size={16} />
-                    </button>
-                  </td>
-                </tr>
+  return (
+    <section className="queue-page">
+      <div className="max-w-7xl mx-auto p-4">
+        {isLoading ? (
+          <div className="skeleton-text h-64">
+            <div className="h-6 w-full mb-3" />
+            <div className="h-6 w-full mb-3" />
+            <div className="h-6 w-full mb-3" />
+          </div>
+        ) : unassignedCount === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-4xl text-muted-foreground mb-4">
+              <Clock3 size={32} className="inline-block align-middle" />
+              <span>Nenhum chamado não atribuído</span>
+            </div>
+            <p className="text-muted-foreground">
+              Todos os chamados estão atribuídos ou o sistema está offline.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              {queue.map((t) => (
+                <div
+                  key={t.id}
+                  className="rounded-lg border p-4 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-medium">{t.descricao}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {formatDate(t.criado_em)} • {t.status}
+                      </p>
+                    </div>
+                    {!t.assignee_id && (
+                      <span className="text-sm px-2 py-1 rounded bg-orange-100/30 text-orange-400">
+                        <small>Não atribuído</small>
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-2 text-sm line-clamp-2">
+                    {t.descricao}
+                  </p>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </section>
-      )}
-    </section>
+            </div>
 
-    {/* Regras e Estatísticas */}
-    <section className="panel queue-rules-panel">
-      <div className="panel-heading"><div><span className="section-kicker">REGRAS DA FILA</span><button className="collapse-button" style={{ display: 'none' }}>&times;</button></div></div>
-      <div className="panel-body">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-            <h3 className="font-medium text-gray-600">Ordem por prioridade e espera</h3>
-            <p className="text-gray-400 text-sm">
-              Chamados são ordenados automaticamente por tempo de fila e nível de prioridade (urgente > alta > média > baixa)
-            </p>
-          </div>
-          <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-            <h3 className="font-medium text-gray-600">Aviso ao supervisor</h3>
-            <p className="text-gray-400 text-sm">
-              Quando a fila ultrapassa 5 chamados, supervisores são notificados automaticamente
-            </p>
-          </div>
-          <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-            <h3 className="font-medium text-gray-600">Histórico de movimentações</h3>
-            <p className="text-gray-400 text-sm">
-              Todas as transferências e alterações de status são registradas no histórico para auditoria
-            </p>
-          </div>
-        </div>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="p-4 rounded-lg bg-blue-50/30">
+                <div className="font-medium">Total</div>
+                <div className="text-2xl font-bold text-blue-600">{summary.total}</div>
+              </div>
+              <div className="p-4 rounded-lg bg-green-50/30">
+                <div className="font-medium">Não atribuídos</div>
+                <div className="text-2xl font-bold text-green-600">{summary.unassignedCount}</div>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t">
+              <p className="text-sm text-muted-foreground">
+                Atualizações a cada 30 segundos
+              </p>
+            </div>
+          </>
+        )}
       </div>
     </section>
-  </div>
+  )
 }

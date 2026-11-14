@@ -19,6 +19,56 @@ export function setUnauthorizedHandler(handler: () => void) {
   unauthorizedHandler = handler
 }
 
+// Armazena o papel do usuário atual para mensagens de erro personalizadas
+let currentUserRole: string | null = null
+export function setCurrentUserRole(role: string | null) {
+  currentUserRole = role
+}
+
+// Mensagens de erro amigáveis por papel do usuário
+function getFriendlyErrorMessage(status: number, detail: string, role: string | null): string {
+  // Mensagens base do backend (detail)
+  const backendMessage = detail || `Falha na solicitação (${status}).`
+
+  // Se não há papel definido, retorna mensagem padrão
+  if (!role) return backendMessage
+
+  switch (status) {
+    case 401: // Unauthorized - Sessão expirada ou token inválido
+      if (role === 'administrador' || role === 'suporte_n1' || role === 'suporte_n2') {
+        return 'Sessão expirada. Por favor, faça login novamente.'
+      }
+      return 'Sua sessão expirou. Por favor, faça login novamente.'
+
+    case 403: // Forbidden - Permissão negada
+      if (role === 'administrador') {
+        return 'Acesso administrativo negado. Verifique suas permissões.'
+      }
+      if (role === 'suporte_n1' || role === 'suporte_n2') {
+        return 'Você não tem permissão para realizar esta operação.'
+      }
+      return 'Permissão negada. Você não tem acesso a este recurso.'
+
+    case 404: // Not Found
+      return 'O recurso solicitado não foi encontrado.'
+
+    case 409: // Conflict
+      return `Conflito: ${backendMessage}`
+
+    case 422: // Unprocessable Entity - Validation errors
+      return `Dados inválidos: ${backendMessage}`
+
+    case 500: // Internal Server Error
+      if (role === 'administrador' || role === 'suporte_n1' || role === 'suporte_n2') {
+        return 'Erro interno do servidor. Verifique os logs ou tente novamente.'
+      }
+      return 'Ocorreu um erro interno. Tente novamente em alguns instantes.'
+
+    default:
+      return backendMessage
+  }
+}
+
 export function apiUrl(path: string) {
   return `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
 }
@@ -28,7 +78,12 @@ async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     let payload: ApiError | undefined
     try { payload = await response.json() as ApiError } catch { /* body may not be JSON */ }
-    throw new ApiRequestError(response.status, payload?.detail || `Falha na solicitação (${response.status}).`, payload)
+
+    // Mensagem de erro personalizada por papel do usuário
+    const detail = payload?.detail || ''
+    const friendlyMessage = getFriendlyErrorMessage(response.status, detail, currentUserRole)
+
+    throw new ApiRequestError(response.status, friendlyMessage, payload)
   }
   if (response.status === 204) return undefined as T
   const contentType = response.headers.get('content-type') || ''

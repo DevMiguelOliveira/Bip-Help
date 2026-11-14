@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from 'react'
 import type { User } from '../types'
 import { getMe, login as loginRequest } from '../services/auth'
-import { setUnauthorizedHandler } from '../lib/api'
+import { setUnauthorizedHandler, setCurrentUserRole } from '../lib/api'
 
 interface AuthContextValue {
   token: string | null
@@ -39,7 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     getMe(token)
       .then((current) => {
-        if (!cancelled) setUser(current)
+        if (!cancelled) {
+          setUser(current)
+          setCurrentUserRole(current.perfil_sistema)
+        }
       })
       .catch(() => {
         if (!cancelled) logout()

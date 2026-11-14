@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { LogOut, Shield, Users, Settings, Router, Dumbbell, PieChart, BarChart2, Clipboard, Calendar, Lock, AlertCircle, Folder, Mail, Award, Timer, Users2, FolderSearch, Layout, MailCheck, TrendingUp, MessageCircle, Home, LogOut as LogOutSolid } from 'lucide-react'
+import { Users, Settings, Dumbbell, AlertCircle, Lock, Layout, ArrowRight, LogOut, Users2, Award, Timer, MessageCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function AdminPage() {
-  const { user, token } = useAuth()
-  const [section, setSection] = useState<'dashboard' | 'users' | 'bip-bot' | 'notifications' | 'security' | 'settings'>('dashboard')
+  const { token } = useAuth()
+  const [section] = useState<'dashboard' | 'users' | 'bip-bot' | 'notifications' | 'security' | 'settings'>('dashboard')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   // Dashboard stats
@@ -28,12 +27,12 @@ export default function AdminPage() {
   }, [token])
 
   const sections = [
-    { key: 'dashboard', title: 'Visão Geral', icon: Layout, href: '/admin' },
-    { key: 'users', title: 'Usuários', icon: Users, href: '/admin/users' },
-    { key: 'bip-bot', title: 'BIP Bot', icon: Dumbbell, href: '/admin/bip-bot' },
-    { key: 'notifications', title: 'Notificações', icon: AlertCircle, href: '/admin/notifications' },
-    { key: 'security', title: 'Segurança', icon: Lock, href: '/admin/security' },
-    { key: 'settings', title: 'Configurações', icon: Settings, href: '/admin/settings' }
+    { key: 'dashboard', title: 'Visão Geral', icon: Layout, path: '/admin' },
+    { key: 'users', title: 'Usuários', icon: Users, path: '/admin/users' },
+    { key: 'bip-bot', title: 'BIP Bot', icon: Dumbbell, path: '/admin/bip-bot' },
+    { key: 'notifications', title: 'Notificações', icon: AlertCircle, path: '/admin/notifications' },
+    { key: 'security', title: 'Segurança', icon: Lock, path: '/admin/security' },
+    { key: 'settings', title: 'Configurações', icon: Settings, path: '/admin/settings' }
   ]
 
   function toggleSidebar() {
@@ -57,7 +56,7 @@ export default function AdminPage() {
               : "flex items-center gap-3 px-2 py-2 rounded-md hover:bg-gray-700 font-medium transition-colors"}
             >
               <Link
-                href={s.href}
+                to={s.path}
                 className={sidebarCollapsed
                   ? "block text-gray-300"
                   : "items-center gap-2 text-white"}
@@ -80,7 +79,7 @@ export default function AdminPage() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
           <button onClick={toggleSidebar} className="sm:hidden p-2 text-gray-400 hover:text-white">
-            <LogOutSolid size={20} />
+            <LogOut size={20} />
           </button>
         </div>
 

@@ -73,11 +73,19 @@ export default function TicketChatDialog({ ticket, onClose }: { ticket: Ticket; 
           const timeSinceToken = Date.now() - tokenCreatedAt
           const shouldRefresh = timeSinceToken > 45_000 // Refresh at 45s (before 60s expiry)
           retryCount += 1
-          const delay = Math.min(1000 * 2 ** Math.min(retryCount, 5), 30_000)
+          // Exponential backoff: start at 3s, max 30s
+          const baseDelay = 3_000
+          const delay = Math.min(baseDelay * 2 ** Math.min(retryCount - 1, 4), 30_000)
           // If token expired, force a refresh by requesting new token on next connect
           retryTimer = window.setTimeout(connect, shouldRefresh ? 100 : delay)
         }
-        socket.onerror = () => socket?.close()
+        socket.onerror = () => {
+          setWsStatus('offline')
+          if (active) {
+            retryCount += 1
+            reconnectTimer = window.setTimeout(connect, Math.min(1000 * 2 ** Math.min(retryCount, 5), 30_000))
+          }
+        }
       } catch {
         setWsStatus('offline')
         if (active) {
